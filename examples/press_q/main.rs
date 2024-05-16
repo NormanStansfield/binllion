@@ -1,3 +1,5 @@
+// press_q
+
 // 標準ライブラリの読み込み
 use std::io::{self, Read};
 
