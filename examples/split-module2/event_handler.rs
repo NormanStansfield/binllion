@@ -1,9 +1,9 @@
-// ratatui
+// split-module2
 
 // イベントハンドラ
-// テスト用出力関数
+// テスト用出力関数の読み込み
 use self::test::dbg_print_key_code;
-// crosstermクレート
+// crosstermの読み込み
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 
 pub(crate) struct EventHandler {
@@ -75,7 +75,7 @@ impl EventHandler {
         }
 
         // 入力されたキーを画面出力
-        // dbg_print_key_code(key_event);
+        dbg_print_key_code(key_event);
     }
 }
 

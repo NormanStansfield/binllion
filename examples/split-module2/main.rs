@@ -1,10 +1,10 @@
-// ratatui
+// split-module2
 
 // モジュールファイルの読み込み
 mod event_handler;
 mod tui;
 
-// イベントハンドラ
+// イベントハンドラの読み込み
 use crate::event_handler::EventHandler;
 // TUI関連
 use crate::tui::{end_tui, init_tui};
