@@ -12,6 +12,7 @@ use std::io::{self, stdout};
 use ratatui::prelude::*;
 use ratatui::symbols::border;
 use ratatui::widgets::{block::*, *};
+use ratatui::widgets::{block::Position, *};
 
 // 画面初期化
 pub(crate) fn init_tui() -> io::Result<()> {
@@ -83,7 +84,7 @@ pub(crate) fn render_main() -> io::Result<()> {
         let layout = Layout::default()
             .direction(Direction::Horizontal)
             .constraints(vec![Constraint::Percentage(50), Constraint::Percentage(50)])
-            .split(frame.size());
+            .split(frame.area());
 
         // 右側を上下に50%分割
         let sub_layout = Layout::default()
