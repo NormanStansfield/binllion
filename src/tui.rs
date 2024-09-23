@@ -11,8 +11,42 @@ use std::io::{self, stdout};
 // ratatuiクレート
 use ratatui::prelude::*;
 use ratatui::symbols::border;
-use ratatui::widgets::{block::*, *};
-use ratatui::widgets::{block::Position, *};
+use ratatui::widgets::block::{Position, Title};
+use ratatui::widgets::*;
+
+// 編集用構造体
+struct BinData {
+    buf: Vec<u8>,
+}
+
+impl BinData {
+    pub(crate) fn from(buf: Vec<u8>) -> Self {
+        BinData { buf: buf }
+    }
+
+    pub(crate) fn new() -> Self {
+        // BinData { buf: vec![] }
+        Self::from(Vec::new())
+    }
+
+    pub(crate) fn push_buf(&mut self, mut new_buf: Vec<u8>) {
+        self.buf.append(&mut new_buf);
+    }
+
+    pub(crate) fn set_buf(&mut self, buf: Vec<u8>) {
+        self.buf = buf;
+    }
+
+    pub(crate) fn buf(&self) -> &[u8] {
+        &self.buf
+    }
+}
+
+impl Default for BinData {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 // 画面初期化
 pub(crate) fn init_tui() -> io::Result<()> {
@@ -71,7 +105,15 @@ pub(crate) fn render_main() -> io::Result<()> {
         width = 8
     ));
 
-    let contents = Paragraph::new(Text::from(vec![header])).block(block);
+    let mut bin_data = BinData::new();
+    bin_data.push_buf(vec![
+        0x01, 0x02, 0x03, 0x00, 0x63, 0x71, 0x00, 0x61, 0x62, 0x63, 0x01, 0x02, 0x03, 0x00, 0x63,
+        0x71, 0x0f, 0x61, 0x62, 0x63, 0x01, 0x02, 0x03, 0x00, 0x63, 0x71, 0x0f, 0x61, 0x62, 0x63,
+    ]);
+    let data = Line::from(format!("{:width$} {:?}", " ", bin_data.buf(), width = 8));
+
+    // let contents = Paragraph::new(Text::from(vec![header])).block(block);
+    let contents = Paragraph::new(Text::from(vec![header, data])).block(block);
 
     // サブパネル0
     // todo!()
