@@ -36,6 +36,13 @@ impl BinData {
         self.buf.insert(index, value);
     }
 
+    pub(crate) fn update(&mut self, index: usize, value: u8) {
+        self.buf.make_contiguous();
+        if let Some(elem) = self.buf.get_mut(index) {
+            *elem = value;
+        }
+    }
+
     pub(crate) fn buf(&self) -> &[u8] {
         let (res, _) = self.buf.as_slices();
         res
