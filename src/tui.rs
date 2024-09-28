@@ -7,6 +7,7 @@ use crossterm::terminal::{
 };
 // 標準ライブラリ
 use std::io::{self, stdout};
+use std::collections::VecDeque;
 
 // ratatuiクレート
 use ratatui::prelude::*;
@@ -16,29 +17,35 @@ use ratatui::widgets::*;
 
 // 編集用構造体
 struct BinData {
-    buf: Vec<u8>,
+    buf: VecDeque<u8>,
 }
 
 impl BinData {
-    pub(crate) fn from(buf: Vec<u8>) -> Self {
-        BinData { buf: buf }
-    }
-
     pub(crate) fn new() -> Self {
-        // BinData { buf: vec![] }
-        Self::from(Vec::new())
+        BinData { buf: VecDeque::new() }
     }
 
-    pub(crate) fn push_buf(&mut self, mut new_buf: Vec<u8>) {
-        self.buf.append(&mut new_buf);
+    pub(crate) fn push_back(&mut self, new_buf: Vec<u8>) {
+        let mut new_data: VecDeque<u8> = VecDeque::from(new_buf);
+        self.buf.make_contiguous();
+        self.buf.append(&mut new_data);
     }
 
-    pub(crate) fn set_buf(&mut self, buf: Vec<u8>) {
-        self.buf = buf;
+    pub(crate) fn insert(&mut self, index: usize, value: u8) {
+        self.buf.make_contiguous();
+        self.buf.insert(index, value);
     }
 
     pub(crate) fn buf(&self) -> &[u8] {
-        &self.buf
+        let (res, _) = self.buf.as_slices();
+        res
+    }
+
+}
+
+impl From<Vec<u8>> for BinData {
+    fn from(buf: Vec<u8>) -> Self {
+        BinData { buf: VecDeque::from(buf) }
     }
 }
 
@@ -105,15 +112,19 @@ pub(crate) fn render_main() -> io::Result<()> {
         width = 8
     ));
 
+    // 仮データ
     let mut bin_data = BinData::new();
-    bin_data.push_buf(vec![
-        0x01, 0x02, 0x03, 0x00, 0x63, 0x71, 0x00, 0x61, 0x62, 0x63, 0x01, 0x02, 0x03, 0x00, 0x63,
-        0x71, 0x0f, 0x61, 0x62, 0x63, 0x01, 0x02, 0x03, 0x00, 0x63, 0x71, 0x0f, 0x61, 0x62, 0x63,
+    bin_data.push_back(vec![
+        0x01, 0x02, 0x03, 0x00, 0x63, 0x71, 0x00, 0x61, 0x62, 0x0f, 0x01, 0x02, 0x03, 0x00, 0x63,
+        0x71, 0x0f, 0x61, 0x62, 0x63, 0x01, 0xff, 0x03, 0x00, 0x63, 0x71, 0x0f, 0x61, 0x62, 0x63,
     ]);
-    let data = Line::from(format!("{:width$} {:?}", " ", bin_data.buf(), width = 8));
 
-    // let contents = Paragraph::new(Text::from(vec![header])).block(block);
-    let contents = Paragraph::new(Text::from(vec![header, data])).block(block);
+    // 表示データ作成
+    let mut main_panel_data = Vec::new();
+    main_panel_data.push(header);
+    main_panel_data.append(&mut self::to_lines(bin_data.buf(), 8));
+
+    let contents = Paragraph::new(Text::from(main_panel_data)).block(block);
 
     // サブパネル0
     // todo!()
@@ -145,4 +156,18 @@ pub(crate) fn render_main() -> io::Result<()> {
     });
 
     Ok(())
+}
+
+pub(crate) fn to_hex(buf: &[u8]) -> String {
+    let sep = String::from(" ");
+    let hex = buf.iter().map(|x| format!("{:02X}", x)).collect::<Vec<_>>().join(&sep);
+    // dbg!(&ret);
+    hex
+}
+
+pub(crate) fn to_lines(buf: &[u8], len: usize) -> Vec<Line> {
+    let mut vec = Vec::new();
+    buf.chunks(len).for_each(|x| vec.push(Line::from(format!("{:width$} {}", " ", self::to_hex(x), width = 8))));
+    // dbg!(&vec);
+    vec
 }
