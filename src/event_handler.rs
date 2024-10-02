@@ -1,10 +1,10 @@
-// ratatui
-
 // イベントハンドラ
 // テスト用出力関数
-use self::test::dbg_print_key_code;
+// use self::test::dbg_print_key_code;
 // crosstermクレート
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+// 状態管理
+use crate::message::Message;
 
 pub(crate) struct EventHandler {
     looping: bool,
@@ -15,11 +15,14 @@ impl EventHandler {
     pub(crate) fn new() -> Self {
         Self { looping: true }
     }
+
+    pub(crate) fn is_looping(&self) -> bool {
+        self.looping
+    }
+
     // イベントループ
-    pub(crate) fn run(&mut self) {
-        while self.looping {
-            self.handle_events();
-        }
+    pub(crate) fn run(&mut self, message: &mut Message) {
+        self.handle_events();
     }
     // イベントハンドラ
     fn handle_events(&mut self) {
@@ -84,6 +87,8 @@ mod test {
 
     // 画面出力（デバック系）
     // 入力されたキーを画面出力
+    #[test]
+    #[ignore]
     pub(super) fn dbg_print_key_code(key_event: &KeyEvent) {
         // Ctrlなどのキー入力がある場合
         if key_event.modifiers != KeyModifiers::NONE {

@@ -1,5 +1,3 @@
-// ratatui
-
 // TUI関連
 // crosstermクレート
 use crossterm::terminal::{
@@ -7,60 +5,14 @@ use crossterm::terminal::{
 };
 // 標準ライブラリ
 use std::io::{self, stdout};
-use std::collections::VecDeque;
-
 // ratatuiクレート
 use ratatui::prelude::*;
 use ratatui::symbols::border;
 use ratatui::widgets::block::{Position, Title};
 use ratatui::widgets::*;
+// 状態管理
+use crate::message::{Message };
 
-// 編集用構造体
-struct BinData {
-    buf: VecDeque<u8>,
-}
-
-impl BinData {
-    pub(crate) fn new() -> Self {
-        BinData { buf: VecDeque::new() }
-    }
-
-    pub(crate) fn push_back(&mut self, new_buf: Vec<u8>) {
-        let mut new_data: VecDeque<u8> = VecDeque::from(new_buf);
-        self.buf.make_contiguous();
-        self.buf.append(&mut new_data);
-    }
-
-    pub(crate) fn insert(&mut self, index: usize, value: u8) {
-        self.buf.make_contiguous();
-        self.buf.insert(index, value);
-    }
-
-    pub(crate) fn update(&mut self, index: usize, value: u8) {
-        self.buf.make_contiguous();
-        if let Some(elem) = self.buf.get_mut(index) {
-            *elem = value;
-        }
-    }
-
-    pub(crate) fn buf(&self) -> &[u8] {
-        let (res, _) = self.buf.as_slices();
-        res
-    }
-
-}
-
-impl From<Vec<u8>> for BinData {
-    fn from(buf: Vec<u8>) -> Self {
-        BinData { buf: VecDeque::from(buf) }
-    }
-}
-
-impl Default for BinData {
-    fn default() -> Self {
-        Self::new()
-    }
-}
 
 // 画面初期化
 pub(crate) fn init_tui() -> io::Result<()> {
@@ -68,9 +20,6 @@ pub(crate) fn init_tui() -> io::Result<()> {
     crossterm::execute!(stdout(), EnterAlternateScreen)?;
     // raw モードに移行
     enable_raw_mode()?;
-
-    // ratatuiウィジェット処理
-    let _ = render_main();
 
     Ok(())
 }
@@ -83,8 +32,8 @@ pub(crate) fn end_tui() -> io::Result<()> {
 
     Ok(())
 }
-
-pub(crate) fn render_main() -> io::Result<()> {
+// ratatuiウィジェットレンダリング
+pub(crate) fn render_main(message: & Message) -> io::Result<()> {
     let mut terminal = Terminal::new(CrosstermBackend::new(stdout()))?;
     terminal.clear()?;
 
@@ -119,14 +68,8 @@ pub(crate) fn render_main() -> io::Result<()> {
         width = 8
     ));
 
-    // 仮データ
-    let mut bin_data = BinData::new();
-    bin_data.push_back(vec![
-        0x01, 0x02, 0x03, 0x00, 0x63, 0x71, 0x00, 0x61, 0x62, 0x0f, 0x01, 0x02, 0x03, 0x00, 0x63,
-        0x71, 0x0f, 0x61, 0x62, 0x63, 0x01, 0xff, 0x03, 0x00, 0x63, 0x71, 0x0f, 0x61, 0x62, 0x63,
-    ]);
-
-    // 表示データ作成
+    let bin_data = message.bin_data();
+    // メインパネル
     let mut main_panel_data = Vec::new();
     main_panel_data.push(header);
     main_panel_data.append(&mut self::to_lines(bin_data.buf(), 8));
@@ -168,7 +111,7 @@ pub(crate) fn render_main() -> io::Result<()> {
 pub(crate) fn to_hex(buf: &[u8]) -> String {
     let sep = String::from(" ");
     let hex = buf.iter().map(|x| format!("{:02X}", x)).collect::<Vec<_>>().join(&sep);
-    // dbg!(&ret);
+    // dbg!(&hex);
     hex
 }
 
