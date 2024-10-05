@@ -128,8 +128,14 @@ impl ToPrintableAscii {
 struct ToHex;
 struct ToAscii;
 
+// 関数バージョン
 trait ConvertTrait {
     fn convert(buf: &[u8]) -> String;
+}
+
+// メソッドバージョン
+trait ConvertTraitMethod {
+    fn convert(&self, buf: &[u8]) -> String;
 }
 
 impl ConvertTrait for ToHex {
@@ -144,8 +150,30 @@ impl ConvertTrait for ToHex {
     }
 }
 
+impl ConvertTraitMethod for ToHex {
+    fn convert(&self, buf: &[u8]) -> String {
+        let sep = String::from(" ");
+        let hex = buf
+            .iter()
+            .map(|x| format!("{:02X}", x))
+            .collect::<Vec<_>>()
+            .join(&sep);
+        hex
+    }
+}
+
 impl ConvertTrait for ToAscii {
     fn convert(buf: &[u8]) -> String {
+        let res: String = buf
+            .iter()
+            .map(|&x| format!("{}", ToPrintableAscii::as_printable_char(x)))
+            .collect();
+        res
+    }
+}
+
+impl ConvertTraitMethod for ToAscii {
+    fn convert(&self, buf: &[u8]) -> String {
         let res: String = buf
             .iter()
             .map(|&x| format!("{}", ToPrintableAscii::as_printable_char(x)))
@@ -186,11 +214,19 @@ pub(crate) fn to_lines5(buf: &[u8], len: usize, func: fn(&[u8]) -> String) -> Ve
     vec
 }
 
-// 更に別のやり方でトレイト境界を使う
+// 自作トレイトでトレイト境界を使う 関数バージョン
 pub(crate) fn to_lines6<F: ConvertTrait>(buf: &[u8], len: usize) -> Vec<String> {
     let mut vec = Vec::new();
     buf.chunks(len)
         .for_each(|x| vec.push(format!("{:width$} {}", " ", F::convert(x), width = 8)));
+    vec
+}
+
+// 自作トレイトででトレイト境界を使う メソッドバージョン
+pub(crate) fn to_lines7<F: ConvertTraitMethod>(buf: &[u8], len: usize, func: F) -> Vec<String> {
+    let mut vec = Vec::new();
+    buf.chunks(len)
+        .for_each(|x| vec.push(format!("{:width$} {}", " ", func.convert(x), width = 8)));
     vec
 }
 
@@ -411,7 +447,18 @@ mod test {
     #[test]
     fn test_to_lines_with_hello_2() {
         let bin_data = setup();
-        // let expect = setup_to_ascii();
+        let expect = setup_to_ascii();
+        let res = to_lines5(bin_data, 8, to_ascii_9);
+        dbg!(&res);
+        println!("{}: {:?}", "to_ascii_9", &res);
+        assert_eq!(res, expect);
+
+        let expect = setup_to_lines_hex();
+        let res = to_lines5(bin_data, 8, to_hex);
+        dbg!(&res);
+        println!("{}: {:?}", "to_hex", &res);
+        assert_eq!(res, expect);
+
         let res_1 = to_lines5(bin_data, 8, |_| -> String { "hello".to_string() }); // 外部変数をキャプチャしないと関数にキャストされる
                                                                                    /*
                                                                                    let res_1 = to_lines5(bin_data, 8, |_| -> String {bin_data;"hello".to_string()});  // 外部変数をキャプチャするとクロージャとして扱われて型がマッチせずエラー
@@ -419,7 +466,7 @@ mod test {
         dbg!(&res_1);
         println!("{}: {:?}", "hello", &res_1);
 
-        let res_2 = to_lines5(bin_data, 8, |_| -> String { "hello".to_string() });
+        let res_2 = to_lines4(bin_data, 8, |_| -> String { "hello".to_string() });
         dbg!(&res_2);
         println!("{}: {:?}", "hello", &res_2);
         assert_eq!(res_1, res_2);
@@ -435,6 +482,27 @@ mod test {
 
         let expect = setup_to_lines_hex();
         let res = to_lines6::<ToHex>(bin_data, 8);
+        dbg!(&res);
+        println!("{}: {:?}", "to_hex", &res);
+        assert_eq!(res, expect);
+    }
+    #[test]
+    fn test_to_lines_with_ascii_and_hex_4() {
+        let bin_data = setup();
+        let expect = setup_to_ascii();
+        let res = to_lines7(bin_data, 8, ToAscii);
+        dbg!(&res);
+        println!("{}: {:?}", "to_ascii_9", &res);
+        assert_eq!(res, expect);
+
+        let to_ascii = ToAscii;
+        let res = to_lines7(bin_data, 8, to_ascii);
+        dbg!(&res);
+        println!("{}: {:?}", "to_ascii_9", &res);
+        assert_eq!(res, expect);
+
+        let expect = setup_to_lines_hex();
+        let res = to_lines7(bin_data, 8, ToHex);
         dbg!(&res);
         println!("{}: {:?}", "to_hex", &res);
         assert_eq!(res, expect);
