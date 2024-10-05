@@ -8,3 +8,7 @@ edition = "2021"
 [dependencies]
 crossterm = "0.28.1"
 ratatui = "0.28.1"
+
+[dev-dependencies]
+ascii = "1.1.0"
+encoding_rs = "0.8.34"
