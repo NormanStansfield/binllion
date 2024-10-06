@@ -1,17 +1,23 @@
-// ratatui
-
 // TUI関連
+
+// モジュールファイルの読み込み
+mod converter;
+
 // crosstermクレート
 use crossterm::terminal::{
     disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen,
 };
 // 標準ライブラリ
 use std::io::{self, stdout};
-
 // ratatuiクレート
 use ratatui::prelude::*;
 use ratatui::symbols::border;
-use ratatui::widgets::{block::*, *};
+use ratatui::widgets::block::{Position, Title};
+use ratatui::widgets::*;
+// 状態管理
+use crate::message::Message;
+// 変換処理系
+use crate::tui::converter::{Converter, ForAscii, ForHex};
 
 // 画面初期化
 pub(crate) fn init_tui() -> io::Result<()> {
@@ -19,9 +25,6 @@ pub(crate) fn init_tui() -> io::Result<()> {
     crossterm::execute!(stdout(), EnterAlternateScreen)?;
     // raw モードに移行
     enable_raw_mode()?;
-
-    // ratatuiウィジェット処理
-    let _ = render_main();
 
     Ok(())
 }
@@ -34,8 +37,8 @@ pub(crate) fn end_tui() -> io::Result<()> {
 
     Ok(())
 }
-
-pub(crate) fn render_main() -> io::Result<()> {
+// ratatuiウィジェットレンダリング
+pub(crate) fn render_main(message: &Message) -> io::Result<()> {
     let mut terminal = Terminal::new(CrosstermBackend::new(stdout()))?;
     terminal.clear()?;
 
@@ -63,6 +66,10 @@ pub(crate) fn render_main() -> io::Result<()> {
     // ))).wrap(Wrap { trim: true }) // wrapすると先頭のスペースがトリムされてしまう
     // .block(block);
 
+    let bin_data = message.bin_data();
+
+    // メインパネル
+
     // 16進数ヘッダー
     let header = Line::from(format!(
         "{:width$} +1 +2 +3 +4 +5 +6 +7 +8 +9 +A +B +C +D +E +F",
@@ -70,10 +77,28 @@ pub(crate) fn render_main() -> io::Result<()> {
         width = 8
     ));
 
-    let contents = Paragraph::new(Text::from(vec![header])).block(block);
+    let mut main_panel_data = Vec::new();
+    main_panel_data.push(header);
+    main_panel_data.append(&mut Converter::convert_to_lines::<ForHex>(
+        bin_data.buf(),
+        8,
+    ));
+
+    let main_contents = Paragraph::new(Text::from(main_panel_data)).block(block.clone());
 
     // サブパネル0
-    // todo!()
+
+    // Asciiヘッダー
+    let header = Line::from(format!("{:width$}+123456789ABCDEF", " ", width = 8));
+
+    let mut sub0_panel_data = Vec::new();
+    sub0_panel_data.push(header);
+    sub0_panel_data.append(&mut Converter::convert_to_lines::<ForAscii>(
+        bin_data.buf(),
+        15,
+    ));
+
+    let sub0_contents = Paragraph::new(Text::from(sub0_panel_data)).block(block.clone());
 
     // サブパネル1
     // todo!()
@@ -83,7 +108,7 @@ pub(crate) fn render_main() -> io::Result<()> {
         let layout = Layout::default()
             .direction(Direction::Horizontal)
             .constraints(vec![Constraint::Percentage(50), Constraint::Percentage(50)])
-            .split(frame.size());
+            .split(frame.area());
 
         // 右側を上下に50%分割
         let sub_layout = Layout::default()
@@ -96,9 +121,9 @@ pub(crate) fn render_main() -> io::Result<()> {
         let sub_panel_1 = sub_layout[1];
 
         // パネルを描画
-        frame.render_widget(&contents, main_panel);
-        frame.render_widget(&contents, sub_panel_0);
-        frame.render_widget(&contents, sub_panel_1);
+        frame.render_widget(&main_contents, main_panel);
+        frame.render_widget(&sub0_contents, sub_panel_0);
+        frame.render_widget(&sub0_contents, sub_panel_1);
     });
 
     Ok(())
