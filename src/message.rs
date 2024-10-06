@@ -7,14 +7,16 @@ pub(crate) struct Message {
 
 impl Message {
     pub(crate) fn new() -> Self {
-        Self { bin_data: BinData::new() }
+        Self {
+            bin_data: BinData::new(),
+        }
     }
 
-    pub(crate) fn bin_data(&self) -> &BinData{
+    pub(crate) fn bin_data(&self) -> &BinData {
         &self.bin_data
     }
 
-    pub(crate) fn bin_data_mut(&mut self) -> &mut BinData{
+    pub(crate) fn bin_data_mut(&mut self) -> &mut BinData {
         &mut self.bin_data
     }
 }
@@ -26,7 +28,9 @@ pub(crate) struct BinData {
 
 impl BinData {
     pub(crate) fn new() -> Self {
-        BinData { buf: VecDeque::new() }
+        BinData {
+            buf: VecDeque::new(),
+        }
     }
 
     pub(crate) fn push_back(&mut self, new_buf: Vec<u8>) {
@@ -51,12 +55,13 @@ impl BinData {
         let (res, _) = self.buf.as_slices();
         res
     }
-
 }
 
 impl From<Vec<u8>> for BinData {
     fn from(buf: Vec<u8>) -> Self {
-        BinData { buf: VecDeque::from(buf) }
+        BinData {
+            buf: VecDeque::from(buf),
+        }
     }
 }
 
@@ -65,4 +70,3 @@ impl Default for BinData {
         Self::new()
     }
 }
-

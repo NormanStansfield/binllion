@@ -1,18 +1,17 @@
 // モジュールファイルの読み込み
 mod event_handler;
-mod tui;
 mod message;
+mod tui;
 
 // イベントハンドラ
 use crate::event_handler::EventHandler;
 // TUI関連
 use crate::tui::{end_tui, init_tui, render_main};
 // 状態管理
-use crate::message::Message ;
+use crate::message::Message;
 
 // main 関数
 fn main() {
-
     // 状態管理
     let mut message = Message::new();
 
@@ -23,7 +22,6 @@ fn main() {
         0x71, 0x0f, 0x61, 0x62, 0x63, 0x01, 0xff, 0x03, 0x00, 0x63, 0x71, 0x0f, 0x61, 0x62, 0x63,
     ]);
 
-
     // 画面初期化
     let _ = init_tui();
 
@@ -33,7 +31,7 @@ fn main() {
     // イベントループ
     while event_handler.is_looping() {
         // 描画処理
-        let _ = render_main(& message);
+        let _ = render_main(&message);
         // イベント処理
         event_handler.run(&mut message);
     }
