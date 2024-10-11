@@ -39,6 +39,9 @@ pub(crate) fn end_tui() -> io::Result<()> {
 }
 // ratatuiウィジェットレンダリング
 pub(crate) fn render_main(message: &Message) -> io::Result<()> {
+    let bin_data = message.bin_data();
+    let cursor = message.cursor();
+
     let mut terminal = Terminal::new(CrosstermBackend::new(stdout()))?;
     terminal.clear()?;
 
@@ -65,8 +68,6 @@ pub(crate) fn render_main(message: &Message) -> io::Result<()> {
     //     width = 8
     // ))).wrap(Wrap { trim: true }) // wrapすると先頭のスペースがトリムされてしまう
     // .block(block);
-
-    let bin_data = message.bin_data();
 
     // メインパネル
 
@@ -125,6 +126,10 @@ pub(crate) fn render_main(message: &Message) -> io::Result<()> {
         frame.render_widget(&sub0_contents, sub_panel_0);
         frame.render_widget(&sub0_contents, sub_panel_1);
     });
+
+    // カーソル表示
+    let _ = terminal.set_cursor_position(*cursor.position());
+    let _ = terminal.show_cursor();
 
     Ok(())
 }
