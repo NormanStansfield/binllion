@@ -89,30 +89,38 @@ pub(crate) struct CursorPosition {
     index: usize,
     position: Position,
     line_len: usize,
+    scroll_y: u16,
 }
 
 impl CursorPosition {
     const STEP: usize = 3;
     const ORIGIN_X: u16 = 10;
     const ORIGIN_Y: u16 = 2;
+    const SCROLL_Y_BORDER: u16 = 6;
 
     pub(crate) fn new() -> Self {
-        let mut index = 0;
-        let mut position = Position {
+        let index = 0;
+        let position = Position {
             x: Self::ORIGIN_X,
             y: Self::ORIGIN_Y,
         };
-        let line_len = 8;
+        let line_len = 16;
+        let scroll_y = 0;
 
         Self {
             index,
             position,
             line_len,
+            scroll_y,
         }
     }
 
     pub(crate) fn position(&self) -> &Position {
         &self.position
+    }
+
+    pub(crate) fn scroll_y(&self) -> &u16 {
+        &self.scroll_y
     }
 
     pub(crate) fn move_to_right(&mut self, len: usize) {
@@ -141,9 +149,23 @@ impl CursorPosition {
         }
         self.calc_position();
     }
-
+    // カーソル位置計算
     fn calc_position(&mut self) {
         self.position.x = Self::ORIGIN_X + (Self::STEP * (self.index % self.line_len)) as u16;
         self.position.y = Self::ORIGIN_Y + (self.index / self.line_len) as u16;
+    }
+    // スクロール計算
+    pub(crate) fn calc_scroll(&mut self, bottom: u16) {
+        let border = bottom - Self::SCROLL_Y_BORDER;
+
+        let scroll_y;
+
+        if self.position.y > border {
+            scroll_y = self.position.y - border;
+            self.position.y = border;
+        } else {
+            scroll_y = 0;
+        }
+        self.scroll_y = scroll_y;
     }
 }

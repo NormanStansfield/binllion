@@ -46,7 +46,7 @@ impl EventHandler {
     // キー入力処理
     fn handle_key_events(&mut self, key_event: &KeyEvent, message: &mut Message) {
         let len = message.bin_data().buf().len();
-        let mut cursor = message.cursor_mut();
+        let cursor = message.cursor_mut();
 
         // Ctrl や SHIFT等のコンビネーションキー処理
         match key_event.modifiers {
@@ -74,22 +74,18 @@ impl EventHandler {
             // 文字関連
             // カーソル左移動
             KeyCode::Char('h') => {
-                // todo!()
                 cursor.move_to_left();
             }
             // カーソル右移動
             KeyCode::Char('l') => {
-                // todo!()
                 cursor.move_to_right(len);
             }
             // カーソル下移動
             KeyCode::Char('j') => {
-                // todo!()
                 cursor.move_to_down(len);
             }
             // カーソル上移動
             KeyCode::Char('k') => {
-                // todo!()
                 cursor.move_to_up();
             }
 

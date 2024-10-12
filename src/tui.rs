@@ -73,7 +73,7 @@ pub(crate) fn render_main(message: &Message) -> io::Result<()> {
 
     // 16進数ヘッダー
     let header = Line::from(format!(
-        "{:width$} +1 +2 +3 +4 +5 +6 +7 +8 +9 +A +B +C +D +E +F",
+        "{:width$} +0 +1 +2 +3 +4 +5 +6 +7 +8 +9 +A +B +C +D +E +F",
         " ",
         width = 8
     ));
@@ -82,24 +82,28 @@ pub(crate) fn render_main(message: &Message) -> io::Result<()> {
     main_panel_data.push(header);
     main_panel_data.append(&mut Converter::convert_to_lines::<ForHex>(
         bin_data.buf(),
-        8,
+        16,
     ));
 
-    let main_contents = Paragraph::new(Text::from(main_panel_data)).block(block.clone());
+    let main_contents = Paragraph::new(Text::from(main_panel_data))
+        .scroll((*cursor.scroll_y(), 0))
+        .block(block.clone());
 
     // サブパネル0
 
     // Asciiヘッダー
-    let header = Line::from(format!("{:width$}+123456789ABCDEF", " ", width = 8));
+    let header = Line::from(format!("{:width$}+0123456789ABCDEF", " ", width = 8));
 
     let mut sub0_panel_data = Vec::new();
     sub0_panel_data.push(header);
     sub0_panel_data.append(&mut Converter::convert_to_lines::<ForAscii>(
         bin_data.buf(),
-        15,
+        16,
     ));
 
-    let sub0_contents = Paragraph::new(Text::from(sub0_panel_data)).block(block.clone());
+    let sub0_contents = Paragraph::new(Text::from(sub0_panel_data))
+        .scroll((*cursor.scroll_y(), 0))
+        .block(block.clone());
 
     // サブパネル1
     // todo!()
@@ -130,6 +134,17 @@ pub(crate) fn render_main(message: &Message) -> io::Result<()> {
     // カーソル表示
     let _ = terminal.set_cursor_position(*cursor.position());
     let _ = terminal.show_cursor();
+
+    Ok(())
+}
+// ratatuiレンダリング準備
+pub(crate) fn render_prep(message: &mut Message) -> io::Result<()> {
+    // let bin_data = message.bin_data_mut();
+    let cursor = message.cursor_mut();
+
+    let mut terminal = Terminal::new(CrosstermBackend::new(stdout()))?;
+    let bottom = terminal.get_frame().area().bottom();
+    cursor.calc_scroll(bottom);
 
     Ok(())
 }
