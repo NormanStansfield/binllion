@@ -1,4 +1,5 @@
 // モジュールファイルの読み込み
+mod constants;
 mod event_handler;
 mod message;
 mod tui;

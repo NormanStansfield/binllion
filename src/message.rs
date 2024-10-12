@@ -2,6 +2,8 @@
 
 use ratatui::layout::Position;
 use std::collections::VecDeque;
+// 定数
+use crate::constants;
 
 // 状態管理
 pub(crate) struct Message {
@@ -88,7 +90,6 @@ impl Default for BinData {
 pub(crate) struct CursorPosition {
     index: usize,
     position: Position,
-    line_len: usize,
     scroll_y: u16,
 }
 
@@ -104,13 +105,11 @@ impl CursorPosition {
             x: Self::ORIGIN_X,
             y: Self::ORIGIN_Y,
         };
-        let line_len = 16;
         let scroll_y = 0;
 
         Self {
             index,
             position,
-            line_len,
             scroll_y,
         }
     }
@@ -138,12 +137,12 @@ impl CursorPosition {
     }
 
     pub(crate) fn move_to_up(&mut self) {
-        self.index = self.index.saturating_sub(self.line_len);
+        self.index = self.index.saturating_sub(constants::LINE_LEN);
         self.calc_position();
     }
 
     pub(crate) fn move_to_down(&mut self, len: usize) {
-        self.index = self.index.saturating_add(self.line_len);
+        self.index = self.index.saturating_add(constants::LINE_LEN);
         if self.index > len {
             self.index = len;
         }
@@ -151,8 +150,8 @@ impl CursorPosition {
     }
     // カーソル位置計算
     fn calc_position(&mut self) {
-        self.position.x = Self::ORIGIN_X + (Self::STEP * (self.index % self.line_len)) as u16;
-        self.position.y = Self::ORIGIN_Y + (self.index / self.line_len) as u16;
+        self.position.x = Self::ORIGIN_X + (Self::STEP * (self.index % constants::LINE_LEN)) as u16;
+        self.position.y = Self::ORIGIN_Y + (self.index / constants::LINE_LEN) as u16;
     }
     // スクロール計算
     pub(crate) fn calc_scroll(&mut self, bottom: u16) {

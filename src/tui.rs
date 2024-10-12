@@ -18,6 +18,8 @@ use ratatui::widgets::*;
 use crate::message::Message;
 // 変換処理系
 use crate::tui::converter::{Converter, ForAscii, ForHex};
+// 定数
+use crate::constants;
 
 // 画面初期化
 pub(crate) fn init_tui() -> io::Result<()> {
@@ -82,7 +84,7 @@ pub(crate) fn render_main(message: &Message) -> io::Result<()> {
     main_panel_data.push(header);
     main_panel_data.append(&mut Converter::convert_to_lines::<ForHex>(
         bin_data.buf(),
-        16,
+        constants::LINE_LEN,
     ));
 
     let main_contents = Paragraph::new(Text::from(main_panel_data))
@@ -98,7 +100,7 @@ pub(crate) fn render_main(message: &Message) -> io::Result<()> {
     sub0_panel_data.push(header);
     sub0_panel_data.append(&mut Converter::convert_to_lines::<ForAscii>(
         bin_data.buf(),
-        16,
+        constants::LINE_LEN,
     ));
 
     let sub0_contents = Paragraph::new(Text::from(sub0_panel_data))
