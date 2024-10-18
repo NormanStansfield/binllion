@@ -15,7 +15,7 @@ use ratatui::symbols::border;
 use ratatui::widgets::block::{Position, Title};
 use ratatui::widgets::*;
 // 状態管理
-use crate::message::Message;
+use crate::message::{Message, Scroll};
 // 変換処理系
 use crate::tui::converter::{Converter, ForAscii, ForHex};
 // 定数
@@ -88,7 +88,7 @@ pub(crate) fn render_main(message: &Message) -> io::Result<()> {
     ));
 
     let main_contents = Paragraph::new(Text::from(main_panel_data))
-        .scroll((*cursor.scroll_y(), 0))
+        .scroll((message.scroll().scroll_y()[0], 0))
         .block(block.clone());
 
     // サブパネル0
@@ -104,7 +104,7 @@ pub(crate) fn render_main(message: &Message) -> io::Result<()> {
     ));
 
     let sub0_contents = Paragraph::new(Text::from(sub0_panel_data))
-        .scroll((*cursor.scroll_y(), 0))
+        .scroll((message.scroll().scroll_y()[0], 0))
         .block(block.clone());
 
     // サブパネル1
@@ -126,7 +126,6 @@ pub(crate) fn render_main(message: &Message) -> io::Result<()> {
         let main_panel = layout[0];
         let sub_panel_0 = sub_layout[0];
         let sub_panel_1 = sub_layout[1];
-
         // パネルを描画
         frame.render_widget(&main_contents, main_panel);
         frame.render_widget(&sub0_contents, sub_panel_0);
@@ -141,12 +140,51 @@ pub(crate) fn render_main(message: &Message) -> io::Result<()> {
 }
 // ratatuiレンダリング準備
 pub(crate) fn render_prep(message: &mut Message) -> io::Result<()> {
-    // let bin_data = message.bin_data_mut();
-    let cursor = message.cursor_mut();
-
     let mut terminal = Terminal::new(CrosstermBackend::new(stdout()))?;
-    let bottom = terminal.get_frame().area().bottom();
-    cursor.calc_scroll(bottom);
+    let frame = terminal.get_frame();
+
+    // 左右に50%分割
+    let layout = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints(vec![Constraint::Percentage(50), Constraint::Percentage(50)])
+        .split(frame.area());
+
+    // 右側を上下に50%分割
+    let sub_layout = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([Constraint::Percentage(50), Constraint::Percentage(50)])
+        .split(layout[1]);
+
+    // 左側をヘッダーとコンテンツに分割
+    let inner_main = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([Constraint::Length(1), Constraint::Fill(1)])
+        .split(layout[0]);
+
+    // 右上側をヘッダーとコンテンツに分割
+    let inner_sub0 = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([Constraint::Length(1), Constraint::Fill(1)])
+        .split(sub_layout[0]);
+
+    // カーソルY軸の算出
+    let pos_y = {
+        let cursor = message.cursor_mut();
+        cursor.calc_position();
+        cursor.position().y
+    };
+    // 画面の下限
+    let main_bottom = layout[0].bottom();
+    // カーソルの下限
+    let main_border = Scroll::calc_border(main_bottom);
+    // メインパネルのスクロール量計算
+    let scroll_y = message.scroll_mut().scroll_y_mut();
+    scroll_y[0] = Scroll::calc_scroll(pos_y, main_border);
+    // カーソルY軸の調整
+    let cursor = message.cursor_mut();
+    cursor.adjust_y(main_border);
+
+    // let sub0_bottom = sub_layout[0].bottom();
 
     Ok(())
 }

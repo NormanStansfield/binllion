@@ -9,6 +9,7 @@ use crate::constants;
 pub(crate) struct Message {
     bin_data: BinData,
     cursor: CursorPosition,
+    scroll: Scroll,
 }
 
 impl Message {
@@ -16,6 +17,7 @@ impl Message {
         Self {
             bin_data: BinData::new(),
             cursor: CursorPosition::new(),
+            scroll: Scroll::new(),
         }
     }
 
@@ -33,6 +35,14 @@ impl Message {
 
     pub(crate) fn cursor_mut(&mut self) -> &mut CursorPosition {
         &mut self.cursor
+    }
+
+    pub(crate) fn scroll(&self) -> &Scroll {
+        &self.scroll
+    }
+
+    pub(crate) fn scroll_mut(&mut self) -> &mut Scroll {
+        &mut self.scroll
     }
 }
 
@@ -90,14 +100,12 @@ impl Default for BinData {
 pub(crate) struct CursorPosition {
     index: usize,
     position: Position,
-    scroll_y: u16,
 }
 
 impl CursorPosition {
     const STEP: usize = 3;
     const ORIGIN_X: u16 = 10;
     const ORIGIN_Y: u16 = 2;
-    const SCROLL_Y_BORDER: u16 = 6;
 
     pub(crate) fn new() -> Self {
         let index = 0;
@@ -105,21 +113,12 @@ impl CursorPosition {
             x: Self::ORIGIN_X,
             y: Self::ORIGIN_Y,
         };
-        let scroll_y = 0;
 
-        Self {
-            index,
-            position,
-            scroll_y,
-        }
+        Self { index, position }
     }
 
     pub(crate) fn position(&self) -> &Position {
         &self.position
-    }
-
-    pub(crate) fn scroll_y(&self) -> &u16 {
-        &self.scroll_y
     }
 
     pub(crate) fn move_to_right(&mut self, len: usize) {
@@ -128,17 +127,17 @@ impl CursorPosition {
         if self.index > len {
             self.index = len;
         }
-        self.calc_position();
+        // self.calc_position();
     }
 
     pub(crate) fn move_to_left(&mut self) {
         self.index = self.index.saturating_sub(1);
-        self.calc_position();
+        // self.calc_position();
     }
 
     pub(crate) fn move_to_up(&mut self) {
         self.index = self.index.saturating_sub(constants::LINE_LEN);
-        self.calc_position();
+        // self.calc_position();
     }
 
     pub(crate) fn move_to_down(&mut self, len: usize) {
@@ -146,25 +145,52 @@ impl CursorPosition {
         if self.index > len {
             self.index = len;
         }
-        self.calc_position();
+        // self.calc_position();
     }
     // カーソル位置計算
-    fn calc_position(&mut self) {
+    pub(crate) fn calc_position(&mut self) {
         self.position.x = Self::ORIGIN_X + (Self::STEP * (self.index % constants::LINE_LEN)) as u16;
         self.position.y = Self::ORIGIN_Y + (self.index / constants::LINE_LEN) as u16;
     }
-    // スクロール計算
-    pub(crate) fn calc_scroll(&mut self, bottom: u16) {
-        let border = bottom - Self::SCROLL_Y_BORDER;
-
-        let scroll_y;
-
+    // カーソル上限計算
+    pub(crate) fn adjust_y(&mut self, border: u16) {
         if self.position.y > border {
-            scroll_y = self.position.y - border;
             self.position.y = border;
+        }
+    }
+}
+
+// スクロール量
+pub(crate) struct Scroll {
+    scroll_y: [u16; 2], // main:0, sub0:1
+}
+
+impl Scroll {
+    fn new() -> Self {
+        let scroll_y = [0; 2];
+        Self { scroll_y }
+    }
+
+    pub(crate) fn scroll_y(&self) -> &[u16; 2] {
+        &self.scroll_y
+    }
+    pub(crate) fn scroll_y_mut(&mut self) -> &mut [u16; 2] {
+        &mut self.scroll_y
+    }
+    // スクロール上限計算
+    pub(crate) fn calc_border(bottom: u16) -> u16 {
+        const SCROLL_Y_BORDER: u16 = 16;
+        let border = bottom.saturating_sub(SCROLL_Y_BORDER);
+        border
+    }
+    // スクロール計算
+    pub(crate) fn calc_scroll(y: u16, border: u16) -> u16 {
+        let scroll_y;
+        if y > border {
+            scroll_y = y - border;
         } else {
             scroll_y = 0;
         }
-        self.scroll_y = scroll_y;
+        scroll_y
     }
 }
