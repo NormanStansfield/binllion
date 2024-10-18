@@ -104,7 +104,7 @@ pub(crate) fn render_main(message: &Message) -> io::Result<()> {
     ));
 
     let sub0_contents = Paragraph::new(Text::from(sub0_panel_data))
-        .scroll((message.scroll().scroll_y()[0], 0))
+        .scroll((message.scroll().scroll_y()[1], 0))
         .block(block.clone());
 
     // サブパネル1
@@ -175,16 +175,22 @@ pub(crate) fn render_prep(message: &mut Message) -> io::Result<()> {
     };
     // 画面の下限
     let main_bottom = layout[0].bottom();
-    // カーソルの下限
+    // メインパネルのスクロール開始ラインの算出
     let main_border = Scroll::calc_border(main_bottom);
     // メインパネルのスクロール量計算
     let scroll_y = message.scroll_mut().scroll_y_mut();
     scroll_y[0] = Scroll::calc_scroll(pos_y, main_border);
-    // カーソルY軸の調整
+
+    // サブパネルの下限
+    let sub0_bottom = sub_layout[0].bottom();
+    // サブ0パネルのスクロール開始ラインの算出
+    let sub0_border = Scroll::calc_border(sub0_bottom);
+    // サブ0パネルのスクロール量計算
+    scroll_y[1] = Scroll::calc_scroll(pos_y, sub0_border);
+
+    // カーソルY座標の調整
     let cursor = message.cursor_mut();
     cursor.adjust_y(main_border);
-
-    // let sub0_bottom = sub_layout[0].bottom();
 
     Ok(())
 }

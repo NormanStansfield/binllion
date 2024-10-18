@@ -179,7 +179,7 @@ impl Scroll {
     }
     // スクロール上限計算
     pub(crate) fn calc_border(bottom: u16) -> u16 {
-        const SCROLL_Y_BORDER: u16 = 16;
+        const SCROLL_Y_BORDER: u16 = 3;
         let border = bottom.saturating_sub(SCROLL_Y_BORDER);
         border
     }
