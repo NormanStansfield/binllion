@@ -43,6 +43,7 @@ pub(crate) fn end_tui() -> io::Result<()> {
 pub(crate) fn render_main(message: &Message) -> io::Result<()> {
     let bin_data = message.bin_data();
     let cursor = message.cursor();
+    let layout = message.layout();
 
     let mut terminal = Terminal::new(CrosstermBackend::new(stdout()))?;
     terminal.clear()?;
@@ -112,20 +113,20 @@ pub(crate) fn render_main(message: &Message) -> io::Result<()> {
 
     let _ = terminal.draw(|frame| {
         // 左右に50%分割
-        let layout = Layout::default()
-            .direction(Direction::Horizontal)
-            .constraints(vec![Constraint::Percentage(50), Constraint::Percentage(50)])
-            .split(frame.area());
+        // let layout = Layout::default()
+        //     .direction(Direction::Horizontal)
+        //     .constraints(vec![Constraint::Percentage(50), Constraint::Percentage(50)])
+        //     .split(frame.area());
 
         // 右側を上下に50%分割
-        let sub_layout = Layout::default()
-            .direction(Direction::Vertical)
-            .constraints([Constraint::Percentage(50), Constraint::Percentage(50)])
-            .split(layout[1]);
+        // let sub_layout = Layout::default()
+        //     .direction(Direction::Vertical)
+        //     .constraints([Constraint::Percentage(50), Constraint::Percentage(50)])
+        //     .split(layout[1]);
 
-        let main_panel = layout[0];
-        let sub_panel_0 = sub_layout[0];
-        let sub_panel_1 = sub_layout[1];
+        let main_panel = layout[0][0];
+        let sub_panel_0 = layout[1][0];
+        let sub_panel_1 = layout[1][1];
         // パネルを描画
         frame.render_widget(&main_contents, main_panel);
         frame.render_widget(&sub0_contents, sub_panel_0);
@@ -144,7 +145,7 @@ pub(crate) fn render_prep(message: &mut Message) -> io::Result<()> {
     let frame = terminal.get_frame();
 
     // 左右に50%分割
-    let layout = Layout::default()
+    let main_layout = Layout::default()
         .direction(Direction::Horizontal)
         .constraints(vec![Constraint::Percentage(50), Constraint::Percentage(50)])
         .split(frame.area());
@@ -153,13 +154,13 @@ pub(crate) fn render_prep(message: &mut Message) -> io::Result<()> {
     let sub_layout = Layout::default()
         .direction(Direction::Vertical)
         .constraints([Constraint::Percentage(50), Constraint::Percentage(50)])
-        .split(layout[1]);
+        .split(main_layout[1]);
 
     // 左側をヘッダーとコンテンツに分割
     let inner_main = Layout::default()
         .direction(Direction::Vertical)
         .constraints([Constraint::Length(1), Constraint::Fill(1)])
-        .split(layout[0]);
+        .split(main_layout[0]);
 
     // 右上側をヘッダーとコンテンツに分割
     let inner_sub0 = Layout::default()
@@ -167,14 +168,14 @@ pub(crate) fn render_prep(message: &mut Message) -> io::Result<()> {
         .constraints([Constraint::Length(1), Constraint::Fill(1)])
         .split(sub_layout[0]);
 
-    // カーソルY軸の算出
+    // カーソルY座標の算出
     let pos_y = {
         let cursor = message.cursor_mut();
         cursor.calc_position();
         cursor.position().y
     };
     // 画面の下限
-    let main_bottom = layout[0].bottom();
+    let main_bottom = main_layout[0].bottom();
     // メインパネルのスクロール開始ラインの算出
     let main_border = Scroll::calc_border(main_bottom);
     // メインパネルのスクロール量計算
@@ -191,6 +192,13 @@ pub(crate) fn render_prep(message: &mut Message) -> io::Result<()> {
     // カーソルY座標の調整
     let cursor = message.cursor_mut();
     cursor.adjust_y(main_border);
+
+    // レイアウトの保存
+    let screen_layout = message.layout_mut();
+    screen_layout[0] = main_layout;
+    screen_layout[1] = sub_layout;
+    screen_layout[2] = inner_main;
+    screen_layout[3] = inner_sub0;
 
     Ok(())
 }

@@ -4,12 +4,15 @@ use ratatui::layout::Position;
 use std::collections::VecDeque;
 // 定数
 use crate::constants;
+use ratatui::prelude::Rect;
+use std::rc::Rc;
 
 // 状態管理
 pub(crate) struct Message {
     bin_data: BinData,
     cursor: CursorPosition,
     scroll: Scroll,
+    layout: [Rc<[Rect]>; 4], // main_layout, sub_layout, inner_main, inner_sub
 }
 
 impl Message {
@@ -18,6 +21,7 @@ impl Message {
             bin_data: BinData::new(),
             cursor: CursorPosition::new(),
             scroll: Scroll::new(),
+            layout: Default::default(),
         }
     }
 
@@ -43,6 +47,14 @@ impl Message {
 
     pub(crate) fn scroll_mut(&mut self) -> &mut Scroll {
         &mut self.scroll
+    }
+
+    pub(crate) fn layout(&self) -> &[Rc<[Rect]>; 4] {
+        &self.layout
+    }
+
+    pub(crate) fn layout_mut(&mut self) -> &mut [Rc<[Rect]>; 4] {
+        &mut self.layout
     }
 }
 
