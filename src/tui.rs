@@ -75,62 +75,63 @@ pub(crate) fn render_main(message: &Message) -> io::Result<()> {
     // メインパネル
 
     // 16進数ヘッダー
-    let header = Line::from(format!(
+    let hex_header = Line::from(format!(
         "{:width$} +0 +1 +2 +3 +4 +5 +6 +7 +8 +9 +A +B +C +D +E +F",
         " ",
         width = 8
     ));
 
     let mut main_panel_data = Vec::new();
-    main_panel_data.push(header);
+    // main_panel_data.push(hex_header);
     main_panel_data.append(&mut Converter::convert_to_lines::<ForHex>(
         bin_data.buf(),
         constants::LINE_LEN,
     ));
 
-    let main_contents = Paragraph::new(Text::from(main_panel_data))
-        .scroll((message.scroll().scroll_y()[0], 0))
-        .block(block.clone());
+    let main_contents =
+        Paragraph::new(Text::from(main_panel_data)).scroll((message.scroll().scroll_y()[0], 0));
+    // .block(block.clone());
 
     // サブパネル0
 
     // Asciiヘッダー
-    let header = Line::from(format!("{:width$}+0123456789ABCDEF", " ", width = 8));
+    let ascii_header = Line::from(format!("{:width$}+0123456789ABCDEF", " ", width = 8));
 
     let mut sub0_panel_data = Vec::new();
-    sub0_panel_data.push(header);
+    // sub0_panel_data.push(ascii_header);
     sub0_panel_data.append(&mut Converter::convert_to_lines::<ForAscii>(
         bin_data.buf(),
         constants::LINE_LEN,
     ));
 
-    let sub0_contents = Paragraph::new(Text::from(sub0_panel_data))
-        .scroll((message.scroll().scroll_y()[1], 0))
-        .block(block.clone());
+    let sub0_contents =
+        Paragraph::new(Text::from(sub0_panel_data)).scroll((message.scroll().scroll_y()[1], 0));
+    // .block(block.clone());
 
     // サブパネル1
     // todo!()
 
     let _ = terminal.draw(|frame| {
-        // 左右に50%分割
-        // let layout = Layout::default()
-        //     .direction(Direction::Horizontal)
-        //     .constraints(vec![Constraint::Percentage(50), Constraint::Percentage(50)])
-        //     .split(frame.area());
-
-        // 右側を上下に50%分割
-        // let sub_layout = Layout::default()
-        //     .direction(Direction::Vertical)
-        //     .constraints([Constraint::Percentage(50), Constraint::Percentage(50)])
-        //     .split(layout[1]);
-
         let main_panel = layout[0][0];
-        let sub_panel_0 = layout[1][0];
-        let sub_panel_1 = layout[1][1];
+        let main_header = layout[2][0];
+        let main_area = layout[2][1];
+
+        let sub0_panel = layout[1][0];
+        let sub0_header = layout[3][0];
+        let sub0_area = layout[3][1];
+
+        let sub1_panel = layout[1][1];
+
         // パネルを描画
-        frame.render_widget(&main_contents, main_panel);
-        frame.render_widget(&sub0_contents, sub_panel_0);
-        frame.render_widget(&sub0_contents, sub_panel_1);
+        frame.render_widget(&block, main_panel);
+        frame.render_widget(&hex_header, main_header);
+        frame.render_widget(&main_contents, main_area);
+
+        frame.render_widget(&block, sub0_panel);
+        frame.render_widget(&ascii_header, sub0_header);
+        frame.render_widget(&sub0_contents, sub0_area);
+
+        frame.render_widget(&block, sub1_panel);
     });
 
     // カーソル表示
@@ -159,12 +160,14 @@ pub(crate) fn render_prep(message: &mut Message) -> io::Result<()> {
     // 左側をヘッダーとコンテンツに分割
     let inner_main = Layout::default()
         .direction(Direction::Vertical)
+        .margin(1)
         .constraints([Constraint::Length(1), Constraint::Fill(1)])
         .split(main_layout[0]);
 
     // 右上側をヘッダーとコンテンツに分割
     let inner_sub0 = Layout::default()
         .direction(Direction::Vertical)
+        .margin(1)
         .constraints([Constraint::Length(1), Constraint::Fill(1)])
         .split(sub_layout[0]);
 
