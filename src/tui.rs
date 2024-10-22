@@ -3,17 +3,14 @@
 // モジュールファイルの読み込み
 mod converter;
 
-// crosstermクレート
-use crossterm::terminal::{
-    disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen,
-};
 // 標準ライブラリ
-use std::io::{self, stdout};
+use std::io::{self};
 // ratatuiクレート
 use ratatui::prelude::*;
 use ratatui::symbols::border;
 use ratatui::widgets::block::{Position, Title};
-use ratatui::widgets::*;
+use ratatui::widgets::{Block, Borders, Clear, Paragraph};
+use ratatui::DefaultTerminal;
 // 状態管理
 use crate::message::{Message, Scroll};
 // 変換処理系
@@ -22,31 +19,28 @@ use crate::tui::converter::{Converter, ForAscii, ForHex};
 use crate::constants;
 
 // 画面初期化
-pub(crate) fn init_tui() -> io::Result<()> {
-    // AlternateScreenへ移行
-    crossterm::execute!(stdout(), EnterAlternateScreen)?;
-    // raw モードに移行
-    enable_raw_mode()?;
+// pub(crate) fn init_tui() -> io::Result<()> {
+//     // AlternateScreenへ移行
+//     crossterm::execute!(stdout(), EnterAlternateScreen)?;
+//     // raw モードに移行
+//     enable_raw_mode()?;
 
-    Ok(())
-}
+//     Ok(())
+// }
 // 画面復旧
-pub(crate) fn end_tui() -> io::Result<()> {
-    // raw モードを解除
-    disable_raw_mode()?;
-    // AlternateScreenから復帰
-    crossterm::execute!(stdout(), LeaveAlternateScreen)?;
+// pub(crate) fn end_tui() -> io::Result<()> {
+//     // raw モードを解除
+//     disable_raw_mode()?;
+//     // AlternateScreenから復帰
+//     crossterm::execute!(stdout(), LeaveAlternateScreen)?;
 
-    Ok(())
-}
+//     Ok(())
+// }
 // ratatuiウィジェットレンダリング
-pub(crate) fn render_main(message: &Message) -> io::Result<()> {
+pub(crate) fn render_main(terminal: &mut DefaultTerminal, message: &Message) -> io::Result<()> {
     let bin_data = message.bin_data();
     let cursor = message.cursor();
     let layout = message.layout();
-
-    let mut terminal = Terminal::new(CrosstermBackend::new(stdout()))?;
-    terminal.clear()?;
 
     // メインパネル
     // 上タイトル
@@ -123,13 +117,15 @@ pub(crate) fn render_main(message: &Message) -> io::Result<()> {
         let sub1_panel = layout[1][1];
 
         // パネルを描画
+        frame.render_widget(Clear, frame.area());
+
         frame.render_widget(&block, main_panel);
-        frame.render_widget(&hex_header, main_header);
-        frame.render_widget(&main_contents, main_area);
+        frame.render_widget(hex_header, main_header);
+        frame.render_widget(main_contents, main_area);
 
         frame.render_widget(&block, sub0_panel);
-        frame.render_widget(&ascii_header, sub0_header);
-        frame.render_widget(&sub0_contents, sub0_area);
+        frame.render_widget(ascii_header, sub0_header);
+        frame.render_widget(sub0_contents, sub0_area);
 
         frame.render_widget(&block, sub1_panel);
     });
@@ -141,8 +137,7 @@ pub(crate) fn render_main(message: &Message) -> io::Result<()> {
     Ok(())
 }
 // ratatuiレンダリング準備
-pub(crate) fn render_prep(message: &mut Message) -> io::Result<()> {
-    let mut terminal = Terminal::new(CrosstermBackend::new(stdout()))?;
+pub(crate) fn render_prep(terminal: &mut DefaultTerminal, message: &mut Message) -> io::Result<()> {
     let frame = terminal.get_frame();
 
     // 左右に50%分割
@@ -160,15 +155,15 @@ pub(crate) fn render_prep(message: &mut Message) -> io::Result<()> {
     // 左側をヘッダーとコンテンツに分割
     let inner_main = Layout::default()
         .direction(Direction::Vertical)
+        .constraints([Constraint::Length(1), Constraint::Min(1)])
         .margin(1)
-        .constraints([Constraint::Length(1), Constraint::Fill(1)])
         .split(main_layout[0]);
 
     // 右上側をヘッダーとコンテンツに分割
     let inner_sub0 = Layout::default()
         .direction(Direction::Vertical)
+        .constraints([Constraint::Length(1), Constraint::Min(1)])
         .margin(1)
-        .constraints([Constraint::Length(1), Constraint::Fill(1)])
         .split(sub_layout[0]);
 
     // カーソルY座標の算出
