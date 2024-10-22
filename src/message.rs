@@ -1,14 +1,27 @@
+// 情報伝播向け構造体
+
+use ratatui::layout::Position;
 use std::collections::VecDeque;
+// 定数
+use crate::constants;
+use ratatui::prelude::Rect;
+use std::rc::Rc;
 
 // 状態管理
 pub(crate) struct Message {
     bin_data: BinData,
+    cursor: CursorPosition,
+    scroll: Scroll,
+    layout: [Rc<[Rect]>; 4], // main_layout, sub_layout, inner_main, inner_sub
 }
 
 impl Message {
     pub(crate) fn new() -> Self {
         Self {
             bin_data: BinData::new(),
+            cursor: CursorPosition::new(),
+            scroll: Scroll::new(),
+            layout: Default::default(),
         }
     }
 
@@ -18,6 +31,30 @@ impl Message {
 
     pub(crate) fn bin_data_mut(&mut self) -> &mut BinData {
         &mut self.bin_data
+    }
+
+    pub(crate) fn cursor(&self) -> &CursorPosition {
+        &self.cursor
+    }
+
+    pub(crate) fn cursor_mut(&mut self) -> &mut CursorPosition {
+        &mut self.cursor
+    }
+
+    pub(crate) fn scroll(&self) -> &Scroll {
+        &self.scroll
+    }
+
+    pub(crate) fn scroll_mut(&mut self) -> &mut Scroll {
+        &mut self.scroll
+    }
+
+    pub(crate) fn layout(&self) -> &[Rc<[Rect]>; 4] {
+        &self.layout
+    }
+
+    pub(crate) fn layout_mut(&mut self) -> &mut [Rc<[Rect]>; 4] {
+        &mut self.layout
     }
 }
 
@@ -68,5 +105,104 @@ impl From<Vec<u8>> for BinData {
 impl Default for BinData {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+// カーソル位置管理
+pub(crate) struct CursorPosition {
+    index: usize,
+    position: Position,
+}
+
+impl CursorPosition {
+    const STEP: usize = 3;
+    const ORIGIN_X: u16 = 10;
+    const ORIGIN_Y: u16 = 2;
+
+    pub(crate) fn new() -> Self {
+        let index = 0;
+        let position = Position {
+            x: Self::ORIGIN_X,
+            y: Self::ORIGIN_Y,
+        };
+
+        Self { index, position }
+    }
+
+    pub(crate) fn position(&self) -> &Position {
+        &self.position
+    }
+
+    pub(crate) fn move_to_right(&mut self, len: usize) {
+        self.index = self.index.saturating_add(1);
+
+        if self.index > len {
+            self.index = len;
+        }
+        // self.calc_position();
+    }
+
+    pub(crate) fn move_to_left(&mut self) {
+        self.index = self.index.saturating_sub(1);
+        // self.calc_position();
+    }
+
+    pub(crate) fn move_to_up(&mut self) {
+        self.index = self.index.saturating_sub(constants::LINE_LEN);
+        // self.calc_position();
+    }
+
+    pub(crate) fn move_to_down(&mut self, len: usize) {
+        self.index = self.index.saturating_add(constants::LINE_LEN);
+        if self.index > len {
+            self.index = len;
+        }
+        // self.calc_position();
+    }
+    // カーソル位置計算
+    pub(crate) fn calc_position(&mut self) {
+        self.position.x = Self::ORIGIN_X + (Self::STEP * (self.index % constants::LINE_LEN)) as u16;
+        self.position.y = Self::ORIGIN_Y + (self.index / constants::LINE_LEN) as u16;
+    }
+    // カーソル上限計算
+    pub(crate) fn adjust_y(&mut self, border: u16) {
+        if self.position.y > border {
+            self.position.y = border;
+        }
+    }
+}
+
+// スクロール量
+pub(crate) struct Scroll {
+    scroll_y: [u16; 2], // main:0, sub0:1
+}
+
+impl Scroll {
+    fn new() -> Self {
+        let scroll_y = [0; 2];
+        Self { scroll_y }
+    }
+
+    pub(crate) fn scroll_y(&self) -> &[u16; 2] {
+        &self.scroll_y
+    }
+    pub(crate) fn scroll_y_mut(&mut self) -> &mut [u16; 2] {
+        &mut self.scroll_y
+    }
+    // スクロール上限計算
+    pub(crate) fn calc_border(bottom: u16) -> u16 {
+        const SCROLL_Y_BORDER: u16 = 3;
+        let border = bottom.saturating_sub(SCROLL_Y_BORDER);
+        border
+    }
+    // スクロール計算
+    pub(crate) fn calc_scroll(y: u16, border: u16) -> u16 {
+        let scroll_y;
+        if y > border {
+            scroll_y = y - border;
+        } else {
+            scroll_y = 0;
+        }
+        scroll_y
     }
 }

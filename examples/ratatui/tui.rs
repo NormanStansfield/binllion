@@ -65,7 +65,7 @@ pub(crate) fn render_main() -> io::Result<()> {
 
     // 16進数ヘッダー
     let header = Line::from(format!(
-        "{:width$} +1 +2 +3 +4 +5 +6 +7 +8 +9 +A +B +C +D +E +F",
+        "{:width$} +0 +1 +2 +3 +4 +5 +6 +7 +8 +9 +A +B +C +D +E +F",
         " ",
         width = 8
     ));

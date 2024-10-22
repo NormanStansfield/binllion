@@ -1,4 +1,5 @@
 // イベントハンドラ
+
 // テスト用出力関数
 // use self::test::dbg_print_key_code;
 // crosstermクレート
@@ -22,15 +23,15 @@ impl EventHandler {
 
     // イベントループ
     pub(crate) fn run(&mut self, message: &mut Message) {
-        self.handle_events();
+        self.handle_events(message);
     }
     // イベントハンドラ
-    fn handle_events(&mut self) {
+    fn handle_events(&mut self, message: &mut Message) {
         // match式でResultを処理
         match event::read() {
             // キー入力処理
             Ok(Event::Key(key_event)) if key_event.kind == KeyEventKind::Press => {
-                self.handle_key_events(&key_event);
+                self.handle_key_events(&key_event, message);
             }
             // エラーの場合
             Err(err) => {
@@ -43,7 +44,10 @@ impl EventHandler {
         };
     }
     // キー入力処理
-    fn handle_key_events(&mut self, key_event: &KeyEvent) {
+    fn handle_key_events(&mut self, key_event: &KeyEvent, message: &mut Message) {
+        let len = message.bin_data().buf().len();
+        let cursor = message.cursor_mut();
+
         // Ctrl や SHIFT等のコンビネーションキー処理
         match key_event.modifiers {
             // Ctrlが押されている場合
@@ -68,9 +72,27 @@ impl EventHandler {
         // 通常のキー入力処理
         match key_event.code {
             // 文字関連
-            KeyCode::Char(char_code) => {
-                // todo!()
+            // カーソル左移動
+            KeyCode::Char('h') => {
+                cursor.move_to_left();
             }
+            // カーソル右移動
+            KeyCode::Char('l') => {
+                cursor.move_to_right(len);
+            }
+            // カーソル下移動
+            KeyCode::Char('j') => {
+                cursor.move_to_down(len);
+            }
+            // カーソル上移動
+            KeyCode::Char('k') => {
+                cursor.move_to_up();
+            }
+
+            // KeyCode::Char(char_code) => {
+            //     // todo!()
+            // }
+
             // 矢印キー等制御文字は対象外
             _ => {
                 // todo!()
