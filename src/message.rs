@@ -111,6 +111,7 @@ impl Default for BinData {
 // カーソル位置管理
 pub(crate) struct CursorPosition {
     index: usize,
+    input_buf_x: usize,
     position: Position,
 }
 
@@ -121,12 +122,25 @@ impl CursorPosition {
 
     pub(crate) fn new() -> Self {
         let index = 0;
+        let input_buf_x = 0;
         let position = Position {
             x: Self::ORIGIN_X,
             y: Self::ORIGIN_Y,
         };
 
-        Self { index, position }
+        Self {
+            index,
+            input_buf_x,
+            position,
+        }
+    }
+
+    pub(crate) fn index(&self) -> usize {
+        self.index
+    }
+
+    pub(crate) fn input_buf_x(&mut self, value: usize) {
+        self.input_buf_x = value;
     }
 
     pub(crate) fn position(&self) -> &Position {
@@ -161,7 +175,8 @@ impl CursorPosition {
     }
     // カーソル位置計算
     pub(crate) fn calc_position(&mut self) {
-        self.position.x = Self::ORIGIN_X + (Self::STEP * (self.index % constants::LINE_LEN)) as u16;
+        self.position.x = Self::ORIGIN_X
+            + (Self::STEP * (self.index % constants::LINE_LEN) + self.input_buf_x) as u16;
         self.position.y = Self::ORIGIN_Y + (self.index / constants::LINE_LEN) as u16;
     }
     // カーソル上限計算
