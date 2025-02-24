@@ -18,8 +18,8 @@ use std::num::ParseIntError;
 impl InputBuf {
     fn new() -> Self {
         // let mut buf : [char; 2] = Default::default();
-        let mut buf: [char; 2] = ['0'; 2];
-        let mut index = 0;
+        let buf: [char; 2] = ['0'; 2];
+        let index = 0;
         Self { buf, index }
     }
 
@@ -42,7 +42,7 @@ impl InputBuf {
     // バッファに値をセット
     fn set(&mut self, value: u8) {
         // 16進数へ変換
-        let mut str = format!("{:02X}", value);
+        let str = format!("{:02X}", value);
 
         self.index = 0;
         for x in str.chars() {
@@ -146,13 +146,30 @@ impl EventHandler {
                 self.reset_input_buf(message);
             }
 
+            // 書き込みモード変更
+            KeyCode::Char('i') => {
+                message.toggle_mode();
+            }
+
             // 数値データ入力
             KeyCode::Char(char_code @ ('0'..='9' | 'a'..='f' | 'A'..='F')) => {
+                // 入力データをミニバッファへ書き込み
                 self.input_buf.add(char_code);
+
+                // 16進数へ変換が成功なら
                 let res = self.input_buf.to_hex();
-                if let Ok(val) = res.into() {
+                if let Ok(val) = res {
+                    use crate::message::WriteMode::*;
+
                     let index = message.cursor().index();
-                    message.bin_data_mut().update(index, val);
+                    match message.write_mode() {
+                        OverWrite => {
+                            message.bin_data_mut().update(index, val);
+                        }
+                        Insert => {
+                            message.bin_data_mut().insert(index, val);
+                        }
+                    }
                     message.cursor_mut().input_buf_x(self.input_buf.index());
                 }
             }

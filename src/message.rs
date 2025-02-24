@@ -12,6 +12,7 @@ pub(crate) struct Message {
     bin_data: BinData,
     cursor: CursorPosition,
     scroll: Scroll,
+    write_mode: WriteMode,
     layout: [Rc<[Rect]>; 4], // main_layout, sub_layout, inner_main, inner_sub
 }
 
@@ -21,6 +22,7 @@ impl Message {
             bin_data: BinData::new(),
             cursor: CursorPosition::new(),
             scroll: Scroll::new(),
+            write_mode: WriteMode::OverWrite,
             layout: Default::default(),
         }
     }
@@ -47,6 +49,21 @@ impl Message {
 
     pub(crate) fn scroll_mut(&mut self) -> &mut Scroll {
         &mut self.scroll
+    }
+
+    pub(crate) fn write_mode(&self) -> &WriteMode {
+        &self.write_mode
+    }
+
+    // 書き込みモード変更
+    pub(crate) fn toggle_mode(&mut self) -> &WriteMode {
+        use WriteMode::*;
+        let mode = &self.write_mode;
+        self.write_mode = match mode {
+            OverWrite => Insert,
+            Insert => OverWrite,
+        };
+        &self.write_mode
     }
 
     pub(crate) fn layout(&self) -> &[Rc<[Rect]>; 4] {
@@ -79,6 +96,7 @@ impl BinData {
     pub(crate) fn insert(&mut self, index: usize, value: u8) {
         self.buf.make_contiguous();
         self.buf.insert(index, value);
+        self.buf.make_contiguous();
     }
 
     pub(crate) fn update(&mut self, index: usize, value: u8) {
@@ -220,4 +238,10 @@ impl Scroll {
         }
         scroll_y
     }
+}
+
+// 書き込みモード
+pub(crate) enum WriteMode {
+    OverWrite,
+    Insert,
 }

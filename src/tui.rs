@@ -8,7 +8,6 @@ use std::io::{self};
 // ratatuiクレート
 use ratatui::prelude::*;
 use ratatui::symbols::border;
-use ratatui::widgets::block::{Position, Title};
 use ratatui::widgets::{Block, Borders, Clear, Paragraph};
 use ratatui::DefaultTerminal;
 // 状態管理
@@ -44,18 +43,27 @@ pub(crate) fn render_main(terminal: &mut DefaultTerminal, message: &Message) -> 
 
     // メインパネル
     // 上タイトル
-    let title = Title::from(" main ".bold());
-    // 下タイトル
-    let instructions = Title::from(Line::from(vec![" Quit ".into(), "<Ctrl+Q> ".blue().bold()]));
+    let title = Line::from(" main ".bold()).centered();
+
+    // 下タイトル(ステータスバー)
+    let mode = {
+        use crate::message::WriteMode::*;
+        match message.write_mode() {
+            OverWrite => " OVR ",
+            Insert => " INT ",
+        }
+    };
+    let status_bar_left = Line::from(vec![" Mode:".into(), mode.green().bold()]).left_aligned();
+    let status_bar_mid = Line::from("").centered();
+    let status_bar_right =
+        Line::from(vec![" Quit ".into(), "<Ctrl+Q> ".blue().bold()]).right_aligned();
 
     // パネルブロック
     let block = Block::default()
-        .title(title.alignment(Alignment::Center))
-        .title(
-            instructions
-                .alignment(Alignment::Center)
-                .position(Position::Bottom),
-        )
+        .title(title)
+        .title_bottom(status_bar_left)
+        .title_bottom(status_bar_mid)
+        .title_bottom(status_bar_right)
         .borders(Borders::ALL)
         .border_set(border::THICK);
 
