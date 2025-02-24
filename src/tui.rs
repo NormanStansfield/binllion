@@ -81,7 +81,8 @@ pub(crate) fn render_main(terminal: &mut DefaultTerminal, message: &Message) -> 
         "{:width$} +0 +1 +2 +3 +4 +5 +6 +7 +8 +9 +A +B +C +D +E +F",
         " ",
         width = 8
-    ));
+    ))
+    .magenta();
 
     let mut main_panel_data = Vec::new();
     // main_panel_data.push(hex_header);
@@ -97,7 +98,7 @@ pub(crate) fn render_main(terminal: &mut DefaultTerminal, message: &Message) -> 
     // サブパネル0
 
     // Asciiヘッダー
-    let ascii_header = Line::from(format!("{:width$}+0123456789ABCDEF", " ", width = 8));
+    let ascii_header = Line::from(format!("{:width$}+0123456789ABCDEF", " ", width = 8)).magenta();
 
     let mut sub0_panel_data = Vec::new();
     // sub0_panel_data.push(ascii_header);
