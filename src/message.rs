@@ -168,8 +168,8 @@ impl CursorPosition {
     pub(crate) fn move_to_right(&mut self, len: usize) {
         self.index = self.index.saturating_add(1);
 
-        if self.index > len {
-            self.index = len;
+        if self.index >= len {
+            self.index = len - 1;
         }
         // self.calc_position();
     }
@@ -186,8 +186,8 @@ impl CursorPosition {
 
     pub(crate) fn move_to_down(&mut self, len: usize) {
         self.index = self.index.saturating_add(constants::LINE_LEN);
-        if self.index > len {
-            self.index = len;
+        if self.index >= len {
+            self.index = len - 1;
         }
         // self.calc_position();
     }
