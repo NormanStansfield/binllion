@@ -40,7 +40,7 @@ impl InputBuf {
     }
 
     // バッファに値をセット
-    fn set(&mut self, value: u8) {
+    fn set_value(&mut self, value: u8) {
         // 16進数へ変換
         let str = format!("{:02X}", value);
 
@@ -203,11 +203,11 @@ impl EventHandler {
         // dbg_print_key_code(key_event);
     }
 
-    // 入力バッファをカーソル位置の値でリセット
+    // 入力ミニバッファをカーソル位置の値でリセット
     fn reset_input_buf(&mut self, message: &mut Message) {
         let buf = message.bin_data().buf();
         let index = message.cursor().index();
-        self.input_buf.set(buf[index]);
+        self.input_buf.set_value(buf[index.saturating_sub(1)]);
         message.cursor_mut().input_buf_x(self.input_buf.index());
     }
 }
