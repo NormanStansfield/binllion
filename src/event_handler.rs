@@ -146,6 +146,25 @@ impl EventHandler {
                 self.reset_input_buf(message);
             }
 
+            // 削除
+            KeyCode::Delete => {
+                let index = cursor.index();
+
+                // 最後尾の場合は、カーソルを移動
+                if index == len.saturating_sub(1) {
+                    cursor.move_to_left();
+                }
+
+                message.bin_data_mut().remove(index);
+
+                // データが1つの場合はゼロフィル
+                if len == 1 {
+                    message.bin_data_mut().update(0, 0);
+                }
+
+                self.reset_input_buf(message);
+            }
+
             // 書き込みモード変更
             KeyCode::Char('i') => {
                 message.toggle_mode();

@@ -99,6 +99,14 @@ impl BinData {
         self.buf.make_contiguous();
     }
 
+    pub(crate) fn remove(&mut self, index: usize) {
+        self.buf.make_contiguous();
+        if self.buf.len() > 1 {
+            self.buf.remove(index);
+            self.buf.make_contiguous();
+        }
+    }
+
     pub(crate) fn update(&mut self, index: usize, value: u8) {
         self.buf.make_contiguous();
         if let Some(elem) = self.buf.get_mut(index) {
@@ -157,8 +165,8 @@ impl CursorPosition {
         self.index
     }
 
-    pub(crate) fn input_buf_x(&mut self, value: usize) {
-        self.input_buf_x = value;
+    pub(crate) fn input_buf_x(&mut self, x: usize) {
+        self.input_buf_x = x;
     }
 
     pub(crate) fn position(&self) -> &Position {
