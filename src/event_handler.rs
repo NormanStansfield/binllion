@@ -177,6 +177,7 @@ impl EventHandler {
 
                 // 16進数へ変換が成功なら
                 let res = self.input_buf.to_hex();
+
                 if let Ok(val) = res {
                     use crate::message::WriteMode::*;
 
@@ -186,11 +187,26 @@ impl EventHandler {
                             message.bin_data_mut().update(index, val);
                         }
                         Insert => {
-                            message.bin_data_mut().insert(index, val);
+                            // 最初の桁に入力あり
+                            if self.input_buf.index() != 0 {
+                                // 下の桁を0にしたい
+                                self.input_buf.set_value(0);
+                                self.input_buf.add(char_code);
+                                let res = self.input_buf.to_hex();
+                                if let Ok(val) = res {
+                                    message.bin_data_mut().insert(index, val);
+                                }
+                            }
+
+                            // 最後の桁に入力あり
+                            if self.input_buf.index() == 0 {
+                                message.bin_data_mut().update(index, val);
+                            }
                         }
                     }
-                    message.cursor_mut().input_buf_x(self.input_buf.index());
                 }
+                // ミニバッファの入力分、カーソルを移動
+                message.cursor_mut().input_buf_x(self.input_buf.index());
             }
 
             // 矢印キー等制御文字は対象外
