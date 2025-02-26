@@ -126,22 +126,22 @@ impl EventHandler {
         match key_event.code {
             // 文字関連
             // カーソル左移動
-            KeyCode::Char('h') => {
+            KeyCode::Char('h') | KeyCode::Char('H') => {
                 cursor.move_to_left();
                 self.reset_input_buf(message);
             }
             // カーソル右移動
-            KeyCode::Char('l') => {
+            KeyCode::Char('l') | KeyCode::Char('L') => {
                 cursor.move_to_right(len);
                 self.reset_input_buf(message);
             }
             // カーソル下移動
-            KeyCode::Char('j') => {
+            KeyCode::Char('j') | KeyCode::Char('J') => {
                 cursor.move_to_down(len);
                 self.reset_input_buf(message);
             }
             // カーソル上移動
-            KeyCode::Char('k') => {
+            KeyCode::Char('k') | KeyCode::Char('K') => {
                 cursor.move_to_up();
                 self.reset_input_buf(message);
             }
@@ -166,7 +166,7 @@ impl EventHandler {
             }
 
             // 書き込みモード変更
-            KeyCode::Char('i') => {
+            KeyCode::Char('i') | KeyCode::Char('I') => {
                 message.toggle_mode();
             }
 
