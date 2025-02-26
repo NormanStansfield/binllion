@@ -94,7 +94,7 @@ impl BinData {
     }
 
     pub(crate) fn insert(&mut self, index: usize, value: u8) {
-        self.buf.make_contiguous();
+        // self.buf.make_contiguous();
         self.buf.insert(index, value);
         self.buf.make_contiguous();
     }
@@ -103,7 +103,7 @@ impl BinData {
         self.buf.make_contiguous();
         if self.buf.len() > 1 {
             self.buf.remove(index);
-            self.buf.make_contiguous();
+            // self.buf.make_contiguous();
         }
     }
 
