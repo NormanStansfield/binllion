@@ -12,6 +12,7 @@ pub(crate) struct Message {
     bin_data: BinData,
     cursor: CursorPosition,
     scroll: Scroll,
+    write_mode: WriteMode,
     layout: [Rc<[Rect]>; 4], // main_layout, sub_layout, inner_main, inner_sub
 }
 
@@ -21,6 +22,7 @@ impl Message {
             bin_data: BinData::new(),
             cursor: CursorPosition::new(),
             scroll: Scroll::new(),
+            write_mode: WriteMode::OverWrite,
             layout: Default::default(),
         }
     }
@@ -47,6 +49,21 @@ impl Message {
 
     pub(crate) fn scroll_mut(&mut self) -> &mut Scroll {
         &mut self.scroll
+    }
+
+    pub(crate) fn write_mode(&self) -> &WriteMode {
+        &self.write_mode
+    }
+
+    // 書き込みモード変更
+    pub(crate) fn toggle_mode(&mut self) -> &WriteMode {
+        use WriteMode::*;
+        let mode = &self.write_mode;
+        self.write_mode = match mode {
+            OverWrite => Insert,
+            Insert => OverWrite,
+        };
+        &self.write_mode
     }
 
     pub(crate) fn layout(&self) -> &[Rc<[Rect]>; 4] {
@@ -77,8 +94,17 @@ impl BinData {
     }
 
     pub(crate) fn insert(&mut self, index: usize, value: u8) {
-        self.buf.make_contiguous();
+        // self.buf.make_contiguous();
         self.buf.insert(index, value);
+        self.buf.make_contiguous();
+    }
+
+    pub(crate) fn remove(&mut self, index: usize) {
+        self.buf.make_contiguous();
+        if self.buf.len() > 1 {
+            self.buf.remove(index);
+            // self.buf.make_contiguous();
+        }
     }
 
     pub(crate) fn update(&mut self, index: usize, value: u8) {
@@ -111,6 +137,7 @@ impl Default for BinData {
 // カーソル位置管理
 pub(crate) struct CursorPosition {
     index: usize,
+    input_buf_x: usize,
     position: Position,
 }
 
@@ -121,12 +148,25 @@ impl CursorPosition {
 
     pub(crate) fn new() -> Self {
         let index = 0;
+        let input_buf_x = 0;
         let position = Position {
             x: Self::ORIGIN_X,
             y: Self::ORIGIN_Y,
         };
 
-        Self { index, position }
+        Self {
+            index,
+            input_buf_x,
+            position,
+        }
+    }
+
+    pub(crate) fn index(&self) -> usize {
+        self.index
+    }
+
+    pub(crate) fn input_buf_x(&mut self, x: usize) {
+        self.input_buf_x = x;
     }
 
     pub(crate) fn position(&self) -> &Position {
@@ -161,7 +201,8 @@ impl CursorPosition {
     }
     // カーソル位置計算
     pub(crate) fn calc_position(&mut self) {
-        self.position.x = Self::ORIGIN_X + (Self::STEP * (self.index % constants::LINE_LEN)) as u16;
+        self.position.x = Self::ORIGIN_X
+            + (Self::STEP * (self.index % constants::LINE_LEN) + self.input_buf_x) as u16;
         self.position.y = Self::ORIGIN_Y + (self.index / constants::LINE_LEN) as u16;
     }
     // カーソル上限計算
@@ -205,4 +246,10 @@ impl Scroll {
         }
         scroll_y
     }
+}
+
+// 書き込みモード
+pub(crate) enum WriteMode {
+    OverWrite,
+    Insert,
 }
