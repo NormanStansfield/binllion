@@ -2,6 +2,7 @@
 
 use ratatui::layout::Position;
 use std::collections::VecDeque;
+use std::io::Read;
 // 定数
 use crate::constants;
 use ratatui::prelude::Rect;
@@ -13,6 +14,7 @@ pub(crate) struct Message {
     cursor: CursorPosition,
     scroll: Scroll,
     write_mode: WriteMode,
+    current_file: CurrentFile,
     layout: [Rc<[Rect]>; 4], // main_layout, sub_layout, inner_main, inner_sub
 }
 
@@ -23,6 +25,7 @@ impl Message {
             cursor: CursorPosition::new(),
             scroll: Scroll::new(),
             write_mode: WriteMode::OverWrite,
+            current_file: CurrentFile::new(),
             layout: Default::default(),
         }
     }
@@ -64,6 +67,14 @@ impl Message {
             Insert => OverWrite,
         };
         &self.write_mode
+    }
+
+    pub(crate) fn current_file(&self) -> &CurrentFile {
+        &self.current_file
+    }
+
+    pub(crate) fn current_file_mut(&mut self) -> &mut CurrentFile {
+        &mut self.current_file
     }
 
     pub(crate) fn layout(&self) -> &[Rc<[Rect]>; 4] {
@@ -117,6 +128,16 @@ impl BinData {
     pub(crate) fn buf(&self) -> &[u8] {
         let (res, _) = self.buf.as_slices();
         res
+    }
+
+    pub(crate) fn import_from(&mut self, path: &String) -> Result<(), std::io::Error> {
+        let mut file = std::fs::File::open(path)?;
+        let mut tmp_buf = Vec::new();
+        let _ = file.read_to_end(&mut tmp_buf)?;
+        self.buf.clear();
+        self.push_back(tmp_buf);
+
+        Ok(())
     }
 }
 
@@ -252,4 +273,39 @@ impl Scroll {
 pub(crate) enum WriteMode {
     OverWrite,
     Insert,
+}
+
+// 編集対象ファイル
+pub(crate) struct CurrentFile {
+    path: String,
+}
+
+// 編集対象ファイル管理
+impl CurrentFile {
+    fn new() -> Self {
+        let path = String::new();
+        Self { path }
+    }
+
+    pub(crate) fn path(&self) -> &String {
+        &self.path
+    }
+
+    pub(crate) fn path_mut(&mut self) -> &mut String {
+        &mut self.path
+    }
+
+    pub(crate) fn file_name(&self) -> String {
+        let file_name = std::path::Path::new(&self.path)
+            .file_name()
+            .map(|name| name.to_string_lossy().to_string())
+            // 取得できない場合はフルパスを使う
+            .unwrap_or_else(|| self.path.to_string());
+
+        if file_name.is_empty() {
+            "no file".to_string()
+        } else {
+            file_name
+        }
+    }
 }
