@@ -228,8 +228,10 @@ impl EventHandler {
     }
 }
 
+#[cfg(test)]
 mod test {
-    use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+    // use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+    use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 
     // 画面出力（デバック系）
     // 入力されたキーを画面出力

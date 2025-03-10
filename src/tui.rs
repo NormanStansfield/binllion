@@ -43,7 +43,10 @@ pub(crate) fn render_main(terminal: &mut DefaultTerminal, message: &Message) -> 
 
     // メインパネル
     // 上タイトル
-    let title = Line::from(" main ".bold()).centered();
+
+    // ファイル名のみを取得してタイトルとする
+    let file_name = message.current_file().file_name();
+    let title = Line::from(format!(" {file_name} ").bold()).centered();
 
     // 下タイトル(ステータスバー)
     let mode = {
