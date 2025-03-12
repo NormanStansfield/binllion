@@ -2,7 +2,7 @@
 
 use ratatui::layout::Position;
 use std::collections::VecDeque;
-use std::io::Read;
+use std::io::{Read, Write};
 // 定数
 use crate::constants;
 use ratatui::prelude::Rect;
@@ -136,6 +136,16 @@ impl BinData {
         let _ = file.read_to_end(&mut tmp_buf)?;
         self.buf.clear();
         self.push_back(tmp_buf);
+
+        Ok(())
+    }
+
+    pub(crate) fn export_to(&self, path: &String) -> Result<(), std::io::Error> {
+        let mut file = std::fs::File::create(path)?;
+        // let mut tmp_buf = Vec::new();
+        let _ = file.write_all(self.buf())?;
+        // self.buf.clear();
+        // self.push_back(tmp_buf);
 
         Ok(())
     }
@@ -287,8 +297,12 @@ impl CurrentFile {
         Self { path }
     }
 
-    pub(crate) fn path(&self) -> &String {
-        &self.path
+    pub(crate) fn path(&self) -> Option<&String> {
+        if self.path.is_empty() {
+            None
+        } else {
+            Some(&self.path)
+        }
     }
 
     pub(crate) fn path_mut(&mut self) -> &mut String {
