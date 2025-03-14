@@ -56,8 +56,12 @@ pub(crate) fn render_main(terminal: &mut DefaultTerminal, message: &Message) -> 
             Insert => " INT ",
         }
     };
+
+    // メッセージ取り出し
+    let notice = message.notice().pop_front();
+
     let status_bar_left = Line::from(vec![" Mode:".into(), mode.green().bold()]).left_aligned();
-    let status_bar_mid = Line::from("").centered();
+    let status_bar_mid = Line::from(notice).centered();
     let status_bar_right =
         Line::from(vec![" Quit ".into(), "<Ctrl+Q> ".blue().bold()]).right_aligned();
 

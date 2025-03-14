@@ -174,9 +174,12 @@ impl EventHandler {
             KeyCode::Char('s') | KeyCode::Char('S') => {
                 if let Some(path) = message.current_file().path() {
                     if let Err(e) = message.bin_data().export_to(path) {
-                        eprintln!("{e}");
-                        std::process::exit(-1)
+                        message.notice_mut().add(e.to_string());
                     }
+                } else {
+                    message
+                        .notice_mut()
+                        .add("Err: Not specified file path".to_string());
                 }
             }
 
