@@ -4,6 +4,7 @@ use ratatui::layout::Position;
 use std::cell::Cell;
 use std::cell::RefCell;
 use std::collections::VecDeque;
+use std::fmt;
 use std::io::{Read, Write};
 // 定数
 use crate::constants;
@@ -285,6 +286,15 @@ impl Scroll {
 pub(crate) enum WriteMode {
     OverWrite,
     Insert,
+}
+
+impl fmt::Display for WriteMode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::OverWrite => write!(f, " OVR "),
+            Self::Insert => write!(f, " INT "),
+        }
+    }
 }
 
 // 編集対象ファイル

@@ -49,13 +49,9 @@ pub(crate) fn render_main(terminal: &mut DefaultTerminal, message: &Message) -> 
     let title = Line::from(format!(" {file_name} ").bold()).centered();
 
     // 下タイトル(ステータスバー)
-    let mode = {
-        use crate::message::WriteMode::*;
-        match message.write_mode() {
-            OverWrite => " OVR ",
-            Insert => " INT ",
-        }
-    };
+
+    // モード取得
+    let mode = message.write_mode().to_string();
 
     // メッセージ取り出し
     let notice = message.notice().pop_front();
