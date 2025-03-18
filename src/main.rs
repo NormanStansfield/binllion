@@ -39,8 +39,7 @@ fn main() {
         }
         None => {
             let bin_data = message.bin_data_mut();
-            let mut data: Vec<u8> = Vec::new();
-            data.push(0x00);
+            let data: Vec<u8> = vec![0x00];
             bin_data.push_back(data);
         }
     }

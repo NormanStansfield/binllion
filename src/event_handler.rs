@@ -32,11 +32,7 @@ impl InputBuf {
     // バッファの内容を16進数へ変換
     fn to_hex(&self) -> Result<u8, ParseIntError> {
         let str: String = self.buf.iter().collect();
-        let res = u8::from_str_radix(&str, 16);
-        // if let Ok(str) = &res {
-        //     dbg!(format!("{:X}", str));
-        // }
-        res
+        u8::from_str_radix(&str, 16)
     }
 
     // バッファに値をセット
@@ -108,7 +104,7 @@ impl EventHandler {
                 // 対のキーの処理
                 match key_event.code {
                     // Ctrl + qが入力されたら
-                    KeyCode::Char('q') => {
+                    KeyCode::Char('q') | KeyCode::Char('Q') => {
                         // イベントループ終了
                         self.looping = false;
                         // todo!("Process Exit");

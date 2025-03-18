@@ -25,7 +25,7 @@ impl Converter {
     // 制御文字等もDUMMY_CHARに変換して読めるようにする
     pub(crate) fn to_printable_char(num: u8) -> char {
         const DUMMY_CHAR: char = '.';
-        match num as u8 {
+        match num {
             0x0..=0x1f => DUMMY_CHAR,
             0x7f.. => DUMMY_CHAR,
             _ => char::from(num),
@@ -56,13 +56,13 @@ impl ConverterTrait for ForHex {
     }
 }
 
+use std::fmt::Write;
 impl ConverterTrait for ForAscii {
     // Asciiへ変換
     fn convert(buf: &[u8]) -> String {
-        let res: String = buf
-            .iter()
-            .map(|&x| format!("{}", Converter::to_printable_char(x)))
-            .collect();
-        res
+        buf.iter().fold(String::new(), |mut output, &x| {
+            let _ = write!(output, "{}", Converter::to_printable_char(x));
+            output
+        })
     }
 }

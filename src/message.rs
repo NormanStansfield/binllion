@@ -154,7 +154,7 @@ impl BinData {
 
     pub(crate) fn export_to(&self, path: &String) -> Result<(), std::io::Error> {
         let mut file = std::fs::File::create(path)?;
-        let _ = file.write_all(self.buf())?;
+        file.write_all(self.buf())?;
 
         Ok(())
     }
@@ -219,17 +219,14 @@ impl CursorPosition {
         if self.index > len {
             self.index = len;
         }
-        // self.calc_position();
     }
 
     pub(crate) fn move_to_left(&mut self) {
         self.index = self.index.saturating_sub(1);
-        // self.calc_position();
     }
 
     pub(crate) fn move_to_up(&mut self) {
         self.index = self.index.saturating_sub(constants::LINE_LEN);
-        // self.calc_position();
     }
 
     pub(crate) fn move_to_down(&mut self, len: usize) {
@@ -237,7 +234,6 @@ impl CursorPosition {
         if self.index > len {
             self.index = len;
         }
-        // self.calc_position();
     }
     // カーソル位置計算
     pub(crate) fn calc_position(&mut self) {
@@ -273,18 +269,15 @@ impl Scroll {
     // スクロール上限計算
     pub(crate) fn calc_border(bottom: u16) -> u16 {
         const SCROLL_Y_BORDER: u16 = 3;
-        let border = bottom.saturating_sub(SCROLL_Y_BORDER);
-        border
+        bottom.saturating_sub(SCROLL_Y_BORDER)
     }
     // スクロール計算
     pub(crate) fn calc_scroll(y: u16, border: u16) -> u16 {
-        let scroll_y;
         if y > border {
-            scroll_y = y - border;
+            y - border
         } else {
-            scroll_y = 0;
+            0
         }
-        scroll_y
     }
 }
 
@@ -326,7 +319,7 @@ impl CurrentFile {
             .unwrap_or_else(|| self.path.to_string());
 
         if file_name.is_empty() {
-            "no file".to_string()
+            String::from("no file")
         } else {
             file_name
         }
