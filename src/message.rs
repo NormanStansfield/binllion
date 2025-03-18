@@ -1,14 +1,17 @@
 // 情報伝播向け構造体
 
 use ratatui::layout::Position;
+use ratatui::prelude::Rect;
+
 use std::cell::Cell;
 use std::cell::RefCell;
 use std::collections::VecDeque;
+use std::fmt;
 use std::io::{Read, Write};
+use std::rc::Rc;
+
 // 定数
 use crate::constants;
-use ratatui::prelude::Rect;
-use std::rc::Rc;
 
 // 状態管理
 pub(crate) struct Message {
@@ -110,18 +113,21 @@ impl BinData {
         }
     }
 
+    // データ追加
     pub(crate) fn push_back(&mut self, new_buf: Vec<u8>) {
         let mut new_data: VecDeque<u8> = VecDeque::from(new_buf);
         self.buf.make_contiguous();
         self.buf.append(&mut new_data);
     }
 
+    // データ挿入
     pub(crate) fn insert(&mut self, index: usize, value: u8) {
         // self.buf.make_contiguous();
         self.buf.insert(index, value);
         self.buf.make_contiguous();
     }
 
+    // データ削除
     pub(crate) fn remove(&mut self, index: usize) {
         self.buf.make_contiguous();
         if self.buf.len() > 1 {
@@ -130,6 +136,7 @@ impl BinData {
         }
     }
 
+    // データ上書き
     pub(crate) fn update(&mut self, index: usize, value: u8) {
         self.buf.make_contiguous();
         if let Some(elem) = self.buf.get_mut(index) {
@@ -137,11 +144,13 @@ impl BinData {
         }
     }
 
+    // 編集データを[u8]配列で返す
     pub(crate) fn buf(&self) -> &[u8] {
         let (res, _) = self.buf.as_slices();
         res
     }
 
+    // ファイルから読み込み
     pub(crate) fn import_from(&mut self, path: &String) -> Result<(), std::io::Error> {
         let mut file = std::fs::File::open(path)?;
         let mut tmp_buf = Vec::new();
@@ -152,14 +161,16 @@ impl BinData {
         Ok(())
     }
 
+    // ファイルへ書き込み
     pub(crate) fn export_to(&self, path: &String) -> Result<(), std::io::Error> {
         let mut file = std::fs::File::create(path)?;
-        let _ = file.write_all(self.buf())?;
+        file.write_all(self.buf())?;
 
         Ok(())
     }
 }
 
+// Vec<u8>から編集データへ変換
 impl From<Vec<u8>> for BinData {
     fn from(buf: Vec<u8>) -> Self {
         BinData {
@@ -201,43 +212,46 @@ impl CursorPosition {
         }
     }
 
+    // カーソル位置に対応するインデックス
     pub(crate) fn index(&self) -> usize {
         self.index
     }
 
+    // ミニバッファのカーソル位置
     pub(crate) fn input_buf_x(&mut self, x: usize) {
         self.input_buf_x = x;
     }
 
+    // カーソル位置
     pub(crate) fn position(&self) -> &Position {
         &self.position
     }
 
+    // カーソル右移動処理
     pub(crate) fn move_to_right(&mut self, len: usize) {
         self.index = self.index.saturating_add(1);
 
         if self.index > len {
             self.index = len;
         }
-        // self.calc_position();
     }
 
+    // カーソル左移動処理
     pub(crate) fn move_to_left(&mut self) {
         self.index = self.index.saturating_sub(1);
-        // self.calc_position();
     }
 
+    // カーソル上移動処理
     pub(crate) fn move_to_up(&mut self) {
         self.index = self.index.saturating_sub(constants::LINE_LEN);
-        // self.calc_position();
     }
 
+    // カーソル下移動処理
     pub(crate) fn move_to_down(&mut self, len: usize) {
         self.index = self.index.saturating_add(constants::LINE_LEN);
         if self.index > len {
             self.index = len;
         }
-        // self.calc_position();
     }
     // カーソル位置計算
     pub(crate) fn calc_position(&mut self) {
@@ -273,18 +287,15 @@ impl Scroll {
     // スクロール上限計算
     pub(crate) fn calc_border(bottom: u16) -> u16 {
         const SCROLL_Y_BORDER: u16 = 3;
-        let border = bottom.saturating_sub(SCROLL_Y_BORDER);
-        border
+        bottom.saturating_sub(SCROLL_Y_BORDER)
     }
     // スクロール計算
     pub(crate) fn calc_scroll(y: u16, border: u16) -> u16 {
-        let scroll_y;
         if y > border {
-            scroll_y = y - border;
+            y - border
         } else {
-            scroll_y = 0;
+            0
         }
-        scroll_y
     }
 }
 
@@ -292,6 +303,15 @@ impl Scroll {
 pub(crate) enum WriteMode {
     OverWrite,
     Insert,
+}
+
+impl fmt::Display for WriteMode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::OverWrite => write!(f, " OVR "),
+            Self::Insert => write!(f, " INT "),
+        }
+    }
 }
 
 // 編集対象ファイル
@@ -318,6 +338,7 @@ impl CurrentFile {
         &mut self.path
     }
 
+    // ファイル名を返す
     pub(crate) fn file_name(&self) -> String {
         let file_name = std::path::Path::new(&self.path)
             .file_name()
@@ -326,7 +347,7 @@ impl CurrentFile {
             .unwrap_or_else(|| self.path.to_string());
 
         if file_name.is_empty() {
-            "no file".to_string()
+            String::from("no file")
         } else {
             file_name
         }
@@ -349,12 +370,15 @@ impl Notice {
         }
     }
 
+    // メッセージキューへ追加
     pub(crate) fn add(&mut self, state: String) {
         self.notice.borrow_mut().push_back(state);
     }
 
+    // メッセージ取得
     pub(crate) fn pop_front(&self) -> String {
-        const LIMIT: u8 = 2;
+        const LIMIT: u8 = 2; // しばらく表示するためのアクション猶予回数
+
         match self.count.get() {
             0 => {
                 if let Some(state) = self.notice.borrow_mut().pop_front() {

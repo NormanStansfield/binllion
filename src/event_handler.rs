@@ -1,7 +1,5 @@
 // イベントハンドラ
 
-// テスト用出力関数
-// use self::test::dbg_print_key_code;
 // crosstermクレート
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 // 状態管理
@@ -32,11 +30,7 @@ impl InputBuf {
     // バッファの内容を16進数へ変換
     fn to_hex(&self) -> Result<u8, ParseIntError> {
         let str: String = self.buf.iter().collect();
-        let res = u8::from_str_radix(&str, 16);
-        // if let Ok(str) = &res {
-        //     dbg!(format!("{:X}", str));
-        // }
-        res
+        u8::from_str_radix(&str, 16)
     }
 
     // バッファに値をセット
@@ -108,10 +102,9 @@ impl EventHandler {
                 // 対のキーの処理
                 match key_event.code {
                     // Ctrl + qが入力されたら
-                    KeyCode::Char('q') => {
+                    KeyCode::Char('q') | KeyCode::Char('Q') => {
                         // イベントループ終了
                         self.looping = false;
-                        // todo!("Process Exit");
                     }
                     _ => {}
                 }
@@ -147,7 +140,7 @@ impl EventHandler {
             }
 
             // 削除
-            KeyCode::Delete => {
+            KeyCode::Delete | KeyCode::Char('x') | KeyCode::Char('X') => {
                 let index = cursor.index();
 
                 // 最後尾の場合は、カーソルを移動
@@ -171,7 +164,7 @@ impl EventHandler {
             }
 
             // ファイルへ保存
-            KeyCode::Char('s') | KeyCode::Char('S') => {
+            KeyCode::Char('w') | KeyCode::Char('W') => {
                 if let Some(path) = message.current_file().path() {
                     if let Err(e) = message.bin_data().export_to(path) {
                         message.notice_mut().add(e.to_string());
@@ -190,23 +183,28 @@ impl EventHandler {
                 // 入力データをミニバッファへ書き込み
                 self.input_buf.add(char_code);
 
-                // 16進数へ変換が成功なら
+                // 16進数へ変換
                 let res = self.input_buf.to_hex();
 
+                // 16進数へ変換が成功なら
                 if let Ok(val) = res {
                     use crate::message::WriteMode::*;
 
                     let index = message.cursor().index();
                     match message.write_mode() {
+                        // 上書き処理
                         OverWrite => {
                             message.bin_data_mut().update(index, val);
                         }
+                        // 挿入処理
                         Insert => {
                             // 最初の桁に入力あり
                             if self.input_buf.index() != 0 {
-                                // 下の桁を0にしたい
+                                // 下の桁を0にする
                                 self.input_buf.set_value(0);
                                 self.input_buf.add(char_code);
+
+                                // 16進数へ変換
                                 let res = self.input_buf.to_hex();
                                 if let Ok(val) = res {
                                     message.bin_data_mut().insert(index, val);
@@ -229,9 +227,6 @@ impl EventHandler {
                 // todo!()
             }
         }
-
-        // 入力されたキーを画面出力
-        // dbg_print_key_code(key_event);
     }
 
     // 入力ミニバッファをカーソル位置の値でリセット
@@ -240,34 +235,5 @@ impl EventHandler {
         let index = message.cursor().index();
         self.input_buf.set_value(buf[index.saturating_sub(1)]);
         message.cursor_mut().input_buf_x(self.input_buf.index());
-    }
-}
-
-#[cfg(test)]
-mod test {
-    // use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
-    use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
-
-    // 画面出力（デバック系）
-    // 入力されたキーを画面出力
-    #[test]
-    #[ignore]
-    pub(super) fn dbg_print_key_code(key_event: &KeyEvent) {
-        // Ctrlなどのキー入力がある場合
-        if key_event.modifiers != KeyModifiers::NONE {
-            println!("KeyModifiers: {:?} \r", key_event.modifiers);
-        }
-        // 文字関連
-        if let KeyCode::Char(code) = key_event.code {
-            let u8_code = code as u8;
-            println!(
-                "Hex: {0:#X} Binary: {0:08b} ASCII: {0:#03} Character: {0:#?}\r",
-                u8_code
-            );
-        }
-        // 制御文字等
-        else {
-            println!("{:?}\r", key_event);
-        }
     }
 }
