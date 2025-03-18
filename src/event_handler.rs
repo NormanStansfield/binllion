@@ -170,6 +170,21 @@ impl EventHandler {
                 message.toggle_mode();
             }
 
+            // ファイルへ保存
+            KeyCode::Char('s') | KeyCode::Char('S') => {
+                if let Some(path) = message.current_file().path() {
+                    if let Err(e) = message.bin_data().export_to(path) {
+                        message.notice_mut().add(e.to_string());
+                    } else {
+                        let success_msg = String::from("Saved!");
+                        message.notice_mut().add(success_msg);
+                    }
+                } else {
+                    let err_msg = String::from("Not specified file path");
+                    message.notice_mut().add(err_msg);
+                }
+            }
+
             // 数値データ入力
             KeyCode::Char(char_code @ ('0'..='9' | 'a'..='f' | 'A'..='F')) => {
                 // 入力データをミニバッファへ書き込み

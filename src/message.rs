@@ -1,8 +1,10 @@
 // 情報伝播向け構造体
 
 use ratatui::layout::Position;
+use std::cell::Cell;
+use std::cell::RefCell;
 use std::collections::VecDeque;
-use std::io::Read;
+use std::io::{Read, Write};
 // 定数
 use crate::constants;
 use ratatui::prelude::Rect;
@@ -15,6 +17,7 @@ pub(crate) struct Message {
     scroll: Scroll,
     write_mode: WriteMode,
     current_file: CurrentFile,
+    notice: Notice,
     layout: [Rc<[Rect]>; 4], // main_layout, sub_layout, inner_main, inner_sub
 }
 
@@ -26,6 +29,7 @@ impl Message {
             scroll: Scroll::new(),
             write_mode: WriteMode::OverWrite,
             current_file: CurrentFile::new(),
+            notice: Notice::new(),
             layout: Default::default(),
         }
     }
@@ -75,6 +79,14 @@ impl Message {
 
     pub(crate) fn current_file_mut(&mut self) -> &mut CurrentFile {
         &mut self.current_file
+    }
+
+    pub(crate) fn notice(&self) -> &Notice {
+        &self.notice
+    }
+
+    pub(crate) fn notice_mut(&mut self) -> &mut Notice {
+        &mut self.notice
     }
 
     pub(crate) fn layout(&self) -> &[Rc<[Rect]>; 4] {
@@ -136,6 +148,13 @@ impl BinData {
         let _ = file.read_to_end(&mut tmp_buf)?;
         self.buf.clear();
         self.push_back(tmp_buf);
+
+        Ok(())
+    }
+
+    pub(crate) fn export_to(&self, path: &String) -> Result<(), std::io::Error> {
+        let mut file = std::fs::File::create(path)?;
+        let _ = file.write_all(self.buf())?;
 
         Ok(())
     }
@@ -287,8 +306,12 @@ impl CurrentFile {
         Self { path }
     }
 
-    pub(crate) fn path(&self) -> &String {
-        &self.path
+    pub(crate) fn path(&self) -> Option<&String> {
+        if self.path.is_empty() {
+            None
+        } else {
+            Some(&self.path)
+        }
     }
 
     pub(crate) fn path_mut(&mut self) -> &mut String {
@@ -307,5 +330,48 @@ impl CurrentFile {
         } else {
             file_name
         }
+    }
+}
+
+// ステータス伝達
+pub(crate) struct Notice {
+    count: Cell<u8>,
+    notice: RefCell<VecDeque<String>>,
+    cache: RefCell<String>,
+}
+
+impl Notice {
+    pub(crate) fn new() -> Self {
+        Self {
+            count: Cell::new(0),
+            notice: RefCell::new(VecDeque::new()),
+            cache: RefCell::new(String::new()),
+        }
+    }
+
+    pub(crate) fn add(&mut self, state: String) {
+        self.notice.borrow_mut().push_back(state);
+    }
+
+    pub(crate) fn pop_front(&self) -> String {
+        const LIMIT: u8 = 2;
+        match self.count.get() {
+            0 => {
+                if let Some(state) = self.notice.borrow_mut().pop_front() {
+                    *self.cache.borrow_mut() = format!(" {state} ");
+                    self.count.set(1);
+                } else {
+                    self.cache.borrow_mut().clear();
+                }
+            }
+            x if x > LIMIT => {
+                self.count.set(0);
+            }
+            x => {
+                self.count.set(x + 1);
+            }
+        }
+
+        self.cache.borrow().clone()
     }
 }
