@@ -17,24 +17,6 @@ use crate::tui::converter::{Converter, ForAscii, ForHex};
 // 定数
 use crate::constants;
 
-// 画面初期化
-// pub(crate) fn init_tui() -> io::Result<()> {
-//     // AlternateScreenへ移行
-//     crossterm::execute!(stdout(), EnterAlternateScreen)?;
-//     // raw モードに移行
-//     enable_raw_mode()?;
-
-//     Ok(())
-// }
-// 画面復旧
-// pub(crate) fn end_tui() -> io::Result<()> {
-//     // raw モードを解除
-//     disable_raw_mode()?;
-//     // AlternateScreenから復帰
-//     crossterm::execute!(stdout(), LeaveAlternateScreen)?;
-
-//     Ok(())
-// }
 // ratatuiウィジェットレンダリング
 pub(crate) fn render_main(terminal: &mut DefaultTerminal, message: &Message) -> io::Result<()> {
     let bin_data = message.bin_data();
@@ -70,13 +52,6 @@ pub(crate) fn render_main(terminal: &mut DefaultTerminal, message: &Message) -> 
         .borders(Borders::ALL)
         .border_set(border::THICK);
 
-    // let header = Paragraph::new(Text::from(format!(
-    //     "{:width$} +0 +1 +2 +3 +4 +5 +6 +7 +8 +9 +A +B +C +D +E +F",
-    //     " ",
-    //     width = 8
-    // ))).wrap(Wrap { trim: true }) // wrapすると先頭のスペースがトリムされてしまう
-    // .block(block);
-
     // メインパネル
 
     // 16進数ヘッダー
@@ -87,59 +62,74 @@ pub(crate) fn render_main(terminal: &mut DefaultTerminal, message: &Message) -> 
     ))
     .magenta();
 
+    // 編集データ
     let mut main_panel_data = Vec::new();
-    // main_panel_data.push(hex_header);
     main_panel_data.append(&mut Converter::convert_to_lines::<ForHex>(
         bin_data.buf(),
         constants::LINE_LEN,
     ));
 
+    // スクロール量で編集データの表示調整
     let main_contents =
         Paragraph::new(Text::from(main_panel_data)).scroll((message.scroll().scroll_y()[0], 0));
-    // .block(block.clone());
 
     // サブパネル0
 
     // Asciiヘッダー
     let ascii_header = Line::from(format!("{:width$}+0123456789ABCDEF", " ", width = 8)).magenta();
 
+    // Asciiデコーデッドデータ
     let mut sub0_panel_data = Vec::new();
-    // sub0_panel_data.push(ascii_header);
     sub0_panel_data.append(&mut Converter::convert_to_lines::<ForAscii>(
         bin_data.buf(),
         constants::LINE_LEN,
     ));
 
+    // スクロール量でAsciiデコーデッドデータの表示調整
     let sub0_contents =
         Paragraph::new(Text::from(sub0_panel_data)).scroll((message.scroll().scroll_y()[1], 0));
-    // .block(block.clone());
+
+    // パネルブロック
+    let sub0_block = Block::default()
+        .title(Line::from(" ASCII ").centered())
+        .borders(Borders::ALL)
+        .border_set(border::THICK);
 
     // サブパネル1
-    // todo!()
+    let sub1_block = Block::default()
+        .borders(Borders::ALL)
+        .border_set(border::THICK);
 
+    // 描画
     let _ = terminal.draw(|frame| {
+        // メインパネル
         let main_panel = layout[0][0];
         let main_header = layout[2][0];
         let main_area = layout[2][1];
 
+        // サブパネル0
         let sub0_panel = layout[1][0];
         let sub0_header = layout[3][0];
         let sub0_area = layout[3][1];
 
+        // サブパネル1
         let sub1_panel = layout[1][1];
 
         // パネルを描画
         frame.render_widget(Clear, frame.area());
 
+        // メインパネル
         frame.render_widget(&block, main_panel);
         frame.render_widget(hex_header, main_header);
         frame.render_widget(main_contents, main_area);
 
-        frame.render_widget(&block, sub0_panel);
+        // サブパネル0
+        frame.render_widget(&sub0_block, sub0_panel);
         frame.render_widget(ascii_header, sub0_header);
         frame.render_widget(sub0_contents, sub0_area);
 
-        frame.render_widget(&block, sub1_panel);
+        // サブパネル1
+        frame.render_widget(&sub1_block, sub1_panel);
     });
 
     // カーソル表示
@@ -148,6 +138,7 @@ pub(crate) fn render_main(terminal: &mut DefaultTerminal, message: &Message) -> 
 
     Ok(())
 }
+
 // ratatuiレンダリング準備
 pub(crate) fn render_prep(terminal: &mut DefaultTerminal, message: &mut Message) -> io::Result<()> {
     let frame = terminal.get_frame();

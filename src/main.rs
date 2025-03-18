@@ -28,15 +28,18 @@ fn main() {
     // 引数からファイルの読み込み
     let args = Args::parse();
     match args.file {
+        // 引数がある場合
         Some(path) => {
             let bin_data = message.bin_data_mut();
             if let Err(e) = bin_data.import_from(&path) {
                 eprintln!("{e}");
                 std::process::exit(-1)
+            } else {
+                let current_file = message.current_file_mut().path_mut();
+                *current_file = path;
             }
-            let current_file = message.current_file_mut().path_mut();
-            *current_file = path;
         }
+        // 引数がない場合
         None => {
             let bin_data = message.bin_data_mut();
             let data: Vec<u8> = vec![0x00];

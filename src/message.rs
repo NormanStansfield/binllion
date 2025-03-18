@@ -1,15 +1,17 @@
 // 情報伝播向け構造体
 
 use ratatui::layout::Position;
+use ratatui::prelude::Rect;
+
 use std::cell::Cell;
 use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::fmt;
 use std::io::{Read, Write};
+use std::rc::Rc;
+
 // 定数
 use crate::constants;
-use ratatui::prelude::Rect;
-use std::rc::Rc;
 
 // 状態管理
 pub(crate) struct Message {
@@ -111,18 +113,21 @@ impl BinData {
         }
     }
 
+    // データ追加
     pub(crate) fn push_back(&mut self, new_buf: Vec<u8>) {
         let mut new_data: VecDeque<u8> = VecDeque::from(new_buf);
         self.buf.make_contiguous();
         self.buf.append(&mut new_data);
     }
 
+    // データ挿入
     pub(crate) fn insert(&mut self, index: usize, value: u8) {
         // self.buf.make_contiguous();
         self.buf.insert(index, value);
         self.buf.make_contiguous();
     }
 
+    // データ削除
     pub(crate) fn remove(&mut self, index: usize) {
         self.buf.make_contiguous();
         if self.buf.len() > 1 {
@@ -131,6 +136,7 @@ impl BinData {
         }
     }
 
+    // データ上書き
     pub(crate) fn update(&mut self, index: usize, value: u8) {
         self.buf.make_contiguous();
         if let Some(elem) = self.buf.get_mut(index) {
@@ -138,11 +144,13 @@ impl BinData {
         }
     }
 
+    // 編集データを[u8]配列で返す
     pub(crate) fn buf(&self) -> &[u8] {
         let (res, _) = self.buf.as_slices();
         res
     }
 
+    // ファイルから読み込み
     pub(crate) fn import_from(&mut self, path: &String) -> Result<(), std::io::Error> {
         let mut file = std::fs::File::open(path)?;
         let mut tmp_buf = Vec::new();
@@ -153,6 +161,7 @@ impl BinData {
         Ok(())
     }
 
+    // ファイルへ書き込み
     pub(crate) fn export_to(&self, path: &String) -> Result<(), std::io::Error> {
         let mut file = std::fs::File::create(path)?;
         file.write_all(self.buf())?;
@@ -161,6 +170,7 @@ impl BinData {
     }
 }
 
+// Vec<u8>から編集データへ変換
 impl From<Vec<u8>> for BinData {
     fn from(buf: Vec<u8>) -> Self {
         BinData {
@@ -202,18 +212,22 @@ impl CursorPosition {
         }
     }
 
+    // カーソル位置に対応するインデックス
     pub(crate) fn index(&self) -> usize {
         self.index
     }
 
+    // ミニバッファのカーソル位置
     pub(crate) fn input_buf_x(&mut self, x: usize) {
         self.input_buf_x = x;
     }
 
+    // カーソル位置
     pub(crate) fn position(&self) -> &Position {
         &self.position
     }
 
+    // カーソル右移動処理
     pub(crate) fn move_to_right(&mut self, len: usize) {
         self.index = self.index.saturating_add(1);
 
@@ -222,14 +236,17 @@ impl CursorPosition {
         }
     }
 
+    // カーソル左移動処理
     pub(crate) fn move_to_left(&mut self) {
         self.index = self.index.saturating_sub(1);
     }
 
+    // カーソル上移動処理
     pub(crate) fn move_to_up(&mut self) {
         self.index = self.index.saturating_sub(constants::LINE_LEN);
     }
 
+    // カーソル下移動処理
     pub(crate) fn move_to_down(&mut self, len: usize) {
         self.index = self.index.saturating_add(constants::LINE_LEN);
         if self.index > len {
@@ -321,6 +338,7 @@ impl CurrentFile {
         &mut self.path
     }
 
+    // ファイル名を返す
     pub(crate) fn file_name(&self) -> String {
         let file_name = std::path::Path::new(&self.path)
             .file_name()
@@ -352,12 +370,15 @@ impl Notice {
         }
     }
 
+    // メッセージキューへ追加
     pub(crate) fn add(&mut self, state: String) {
         self.notice.borrow_mut().push_back(state);
     }
 
+    // メッセージ取得
     pub(crate) fn pop_front(&self) -> String {
-        const LIMIT: u8 = 2;
+        const LIMIT: u8 = 2; // しばらく表示するためのアクション猶予回数
+
         match self.count.get() {
             0 => {
                 if let Some(state) = self.notice.borrow_mut().pop_front() {
