@@ -175,11 +175,13 @@ impl EventHandler {
                 if let Some(path) = message.current_file().path() {
                     if let Err(e) = message.bin_data().export_to(path) {
                         message.notice_mut().add(e.to_string());
+                    } else {
+                        let success_msg = String::from("Saved!");
+                        message.notice_mut().add(success_msg);
                     }
                 } else {
-                    message
-                        .notice_mut()
-                        .add("Err: Not specified file path".to_string());
+                    let err_msg = String::from("Not specified file path");
+                    message.notice_mut().add(err_msg);
                 }
             }
 
