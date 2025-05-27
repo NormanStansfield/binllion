@@ -1,0 +1,12 @@
+[package]
+name = "app"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+interfaces.workspace = true
+driver.workspace = true
+car.workspace = true
+ui.workspace = true
+
+rand.workspace = true
