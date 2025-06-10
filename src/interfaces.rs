@@ -1,8 +1,8 @@
-trait AppTrait {
-    fn run();
-    fn new(path: FilePath) -> Self;
-    fn is_running() -> bool;
-    fn quit();
+pub(crate) trait AppTrait: Drop {
+    fn run(&mut self);
+    fn new() -> Self;
+    fn is_running(&self) -> bool;
+    fn quit(&mut self);
 }
 
 trait NoticeProviderTrait {
@@ -21,7 +21,8 @@ trait CurrentFileTrait {
     fn set_path(path: FilePath);
 }
 
-pub(crate) struct FilePath (Option<std::ffi::OsString>);
+// #[derive(Clone)]
+pub(crate) struct FilePath(pub Option<std::ffi::OsString>);
 
 trait BinDataTrait {
     fn new() -> Self;
@@ -34,9 +35,9 @@ trait BinDataTrait {
     fn data_from_index(&mut self, index: Index) -> Result<HexData, ()>;
 }
 
-pub(crate) struct HexData (u8);
+pub(crate) struct HexData(u8);
 
-pub(crate) struct Index (u128);
+pub(crate) struct Index(u128);
 
 pub(crate) struct BinData {
     buf: std::collections::VecDeque<u8>,
@@ -68,7 +69,7 @@ trait MiniBufTrait {
     fn to_hex(&self) -> HexData;
 }
 
-pub(crate) struct CharCode (char);
+pub(crate) struct CharCode(char);
 
 pub(crate) struct MiniBuf {
     buf: [char; 2],
@@ -141,5 +142,4 @@ pub(crate) trait TuiAsciiPanelTrait {
     fn set_content(bin_data: &[u8]);
 }
 
-pub(crate) trait TuiVersatilePanelTrait {
-}
+pub(crate) trait TuiVersatilePanelTrait {}
