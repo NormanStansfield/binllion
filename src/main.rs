@@ -1,6 +1,7 @@
 // モジュールファイルの読み込み
 mod constants;
 mod event_handler;
+mod interfaces;
 mod message;
 mod tui;
 
