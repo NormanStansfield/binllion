@@ -24,10 +24,10 @@ trait CurrentFileTrait {
 // #[derive(Clone)]
 pub(crate) struct FilePath(pub Option<std::ffi::OsString>);
 
-trait BinDataTrait {
+pub(crate) trait BinDataTrait {
     fn new() -> Self;
     fn add_data(&mut self, value: HexData);
-    fn insert_data(&mut self, value: HexData);
+    fn insert_data(&mut self, index: Index, value: HexData);
     fn delete_data(&mut self, index: Index);
     fn update_data(&mut self, index: Index, value: HexData);
     fn import_from(&mut self, path: FilePath) -> Result<(), std::io::Error>;
@@ -35,9 +35,9 @@ trait BinDataTrait {
     fn data_from_index(&mut self, index: Index) -> Result<HexData, ()>;
 }
 
-pub(crate) struct HexData(u8);
+pub(crate) struct HexData(pub u8);
 
-pub(crate) struct Index(u128);
+pub(crate) struct Index(pub usize);
 
 pub(crate) struct BinData {
     buf: std::collections::VecDeque<u8>,

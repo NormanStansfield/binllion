@@ -9,6 +9,9 @@ use interfaces::AppTrait as _;
 
 mod app;
 use app::App;
+
+mod bin_data;
+
 // // イベントハンドラ
 // use crate::event_handler::EventHandler;
 // // TUI関連
