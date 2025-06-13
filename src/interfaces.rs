@@ -35,6 +35,7 @@ pub(crate) trait BinDataTrait {
     fn import_from(&mut self, path: FilePath) -> Result<(), std::io::Error>;
     fn export_to(&self, path: FilePath) -> Result<(), std::io::Error>;
     fn data_from_index(&mut self, index: Index) -> Result<HexData, ()>;
+    fn get_file_name(&self) -> Notice;
 }
 
 pub(crate) struct HexData(pub u8);
@@ -130,7 +131,7 @@ pub(crate) trait TuiPanelCommonTrait {
 }
 
 pub(crate) trait TuiMainPanelTrait {
-    fn set_title(&mut self, title: FilePath);
+    fn set_title(&mut self, title: Notice);
     fn set_err_msg(&mut self, message: Notice);
     fn set_mode(&mut self, mode: WriteMode);
     fn set_content(bin_data: &[u8]);

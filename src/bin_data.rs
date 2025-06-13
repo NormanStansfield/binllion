@@ -1,18 +1,21 @@
-use crate::interfaces::{BinDataTrait, FilePath, HexData, Index};
+use crate::interfaces::{BinDataTrait, FilePath, HexData, Index, Notice};
 use std::{
-    f32::consts::E,
+    collections::VecDeque,
+    ffi::OsString,
     io::{Read, Write},
 };
 
 // 編集用構造体
 pub(crate) struct BinData {
-    buf: std::collections::VecDeque<u8>,
+    buf: VecDeque<u8>,
+    path: OsString,
 }
 
 impl BinDataTrait for BinData {
     fn new() -> Self {
         Self {
-            buf: std::collections::VecDeque::<u8>::new(),
+            buf: VecDeque::<u8>::new(),
+            path: OsString::new(),
         }
     }
 
@@ -67,16 +70,17 @@ impl BinDataTrait for BinData {
 
     // ファイルから読み込み
     fn import_from(&mut self, path: FilePath) -> Result<(), std::io::Error> {
-        let path = path.into_inner();
-        if let Some(path) = path {
+        let file_path = path.into_inner();
+        if let Some(os_path) = file_path {
             // ファイルパスがある場合
-            let mut file = std::fs::File::open(path)?;
+            let mut file = std::fs::File::open(os_path.clone())?;
             let mut tmp_buf = Vec::<u8>::new();
             let _ = file.read_to_end(&mut tmp_buf)?;
-            let mut new_data: std::collections::VecDeque<u8> =
-                std::collections::VecDeque::from(tmp_buf);
+            let mut new_data: VecDeque<u8> = VecDeque::from(tmp_buf);
             self.buf.clear();
             self.buf.append(&mut new_data);
+
+            self.path = os_path;
 
             Ok(())
         } else {
@@ -104,6 +108,22 @@ impl BinDataTrait for BinData {
 
     fn data_from_index(&mut self, index: Index) -> Result<HexData, ()> {
         unimplemented!();
+    }
+
+    fn get_file_name(&self) -> Notice {
+        // todo!()
+        // Notice::new(self.path.to_string_lossy());
+        let file_name = std::path::Path::new(&self.path)
+            .file_name()
+            .map(|name| name.to_string_lossy().to_string())
+            // 取得できない場合はフルパスを使う
+            .unwrap_or_else(|| self.path.to_string_lossy().to_string());
+
+        if file_name.is_empty() {
+            Notice::new(String::from("no file"))
+        } else {
+            Notice::new(file_name)
+        }
     }
 }
 

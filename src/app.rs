@@ -80,6 +80,7 @@ impl AppTrait for App {
 
         let mut tui_main_panel = TuiMainPanel::new();
         tui_main_panel.set_err_msg(notice_provider.get_notice());
+        tui_main_panel.set_title(bin_data.get_file_name());
 
         self.quit();
         ratatui::restore();
