@@ -67,7 +67,8 @@ impl BinDataTrait for BinData {
 
     // ファイルから読み込み
     fn import_from(&mut self, path: FilePath) -> Result<(), std::io::Error> {
-        if let FilePath(Some(path)) = path {
+        let path = path.into_inner();
+        if let Some(path) = path {
             // ファイルパスがある場合
             let mut file = std::fs::File::open(path)?;
             let mut tmp_buf = Vec::<u8>::new();
@@ -86,7 +87,8 @@ impl BinDataTrait for BinData {
 
     // ファイルへ書き込み
     fn export_to(&self, path: FilePath) -> Result<(), std::io::Error> {
-        if let FilePath(Some(path)) = path {
+        let path = path.into_inner();
+        if let Some(path) = path {
             // ファイルパスがある場合
             let mut file = std::fs::File::create(path)?;
 

@@ -11,17 +11,20 @@ pub(crate) trait NoticeProviderTrait {
     fn get_notice(&mut self) -> Notice;
 }
 
+use std::ffi::OsString;
+
 use nutype::nutype;
 #[nutype(sanitize(trim), derive(Default), default = "")]
 pub(crate) struct Notice(String);
+
+#[nutype()]
+pub(crate) struct FilePath(Option<std::ffi::OsString>);
 
 trait CurrentFileTrait {
     fn new() -> Self;
     fn get_path() -> FilePath;
     fn set_path(path: FilePath);
 }
-
-pub(crate) struct FilePath(pub Option<std::ffi::OsString>);
 
 pub(crate) trait BinDataTrait {
     fn new() -> Self;

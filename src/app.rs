@@ -31,8 +31,9 @@ struct Args {
 
 impl AppTrait for App {
     fn new() -> Self {
-        // ヘルプ表示用
+        // ヘルプ表示用 ratatui::init()の実行前に実施
         let _ = Args::parse();
+
         // 画面初期化
         let terminal = ratatui::init();
         let running = true;
@@ -51,10 +52,11 @@ impl AppTrait for App {
     fn run(&mut self) {
         // 引数からファイルの読み込み
         let args = Args::parse();
-        let file_path: FilePath = if args.file.is_some() {
-            FilePath(args.file)
+        // let file_path: FilePath = if args.file.is_some() {
+        let file_path: FilePath = if let Some(path) = args.file {
+            FilePath::new(Some(path))
         } else {
-            FilePath(None)
+            FilePath::new(None)
         };
 
         // 編集データ格納用
