@@ -1,6 +1,7 @@
 use crate::{
     bin_data::{self, BinData},
-    interfaces::{AppTrait, BinDataTrait, FilePath},
+    interfaces::{AppTrait, BinDataTrait, FilePath, Notice, NoticeProviderTrait},
+    notice_provider::{self, NoticeProvider},
 };
 
 pub(crate) struct App {
@@ -63,13 +64,16 @@ impl AppTrait for App {
         // ファイルのインポート
         let res = bin_data.import_from(file_path);
 
+        let mut notice_provider = NoticeProvider::new();
+
         if let Err(err) = res {
             // エラーであれば通知する
             let message = err.to_string();
+            notice_provider.add(Notice::new(message));
         };
 
-        ratatui::restore();
         self.quit();
+        ratatui::restore();
 
         unimplemented!();
     }

@@ -5,15 +5,15 @@ pub(crate) trait AppTrait: Drop {
     fn quit(&mut self);
 }
 
-trait NoticeProviderTrait {
+pub(crate) trait NoticeProviderTrait {
     fn new() -> Self;
-    fn add(notice: Notice);
-    fn get_notice() -> Notice;
+    fn add(&mut self, notice: Notice);
+    fn get_notice(&mut self) -> Notice;
 }
 
-pub(crate) struct Notice {
-    message: String,
-}
+use nutype::nutype;
+#[nutype(sanitize(trim), derive(Default), default = "")]
+pub(crate) struct Notice(String);
 
 trait CurrentFileTrait {
     fn new() -> Self;
@@ -21,7 +21,6 @@ trait CurrentFileTrait {
     fn set_path(path: FilePath);
 }
 
-// #[derive(Clone)]
 pub(crate) struct FilePath(pub Option<std::ffi::OsString>);
 
 pub(crate) trait BinDataTrait {

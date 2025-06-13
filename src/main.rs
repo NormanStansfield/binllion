@@ -11,7 +11,7 @@ mod app;
 use app::App;
 
 mod bin_data;
-
+mod notice_provider;
 // // イベントハンドラ
 // use crate::event_handler::EventHandler;
 // // TUI関連
