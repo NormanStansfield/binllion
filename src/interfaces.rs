@@ -121,7 +121,7 @@ struct TuiLayout {
     versatile: TuiArea,
 }
 
-struct TuiArea(ratatui::prelude::Rect);
+pub(crate) struct TuiArea(ratatui::prelude::Rect);
 
 pub(crate) trait TuiPanelCommonTrait {
     fn new() -> Self;
@@ -131,14 +131,12 @@ pub(crate) trait TuiPanelCommonTrait {
 
 pub(crate) trait TuiMainPanelTrait {
     fn set_title(&mut self, title: FilePath);
-    fn set_err_msg(&mut self, message: ErrorMessage);
+    fn set_err_msg(&mut self, message: Notice);
     fn set_mode(&mut self, mode: WriteMode);
     fn set_content(bin_data: &[u8]);
 }
 
-struct ErrorMessage {
-    message: String,
-}
+// pub(crate) struct ErrorMessage(String);
 
 pub(crate) trait TuiAsciiPanelTrait {
     fn set_content(bin_data: &[u8]);

@@ -1,6 +1,10 @@
+use crate::tui::TuiMainPanel;
 use crate::{
     bin_data::{self, BinData},
-    interfaces::{AppTrait, BinDataTrait, FilePath, Notice, NoticeProviderTrait},
+    interfaces::{
+        AppTrait, BinDataTrait, FilePath, Notice, NoticeProviderTrait, TuiMainPanelTrait,
+        TuiPanelCommonTrait,
+    },
     notice_provider::{self, NoticeProvider},
 };
 
@@ -73,6 +77,9 @@ impl AppTrait for App {
             let message = err.to_string();
             notice_provider.add(Notice::new(message));
         };
+
+        let mut tui_main_panel = TuiMainPanel::new();
+        tui_main_panel.set_err_msg(notice_provider.get_notice());
 
         self.quit();
         ratatui::restore();
