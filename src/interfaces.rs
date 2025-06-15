@@ -38,13 +38,15 @@ pub(crate) trait BinDataTrait {
     fn get_file_name(&self) -> Notice;
 }
 
-pub(crate) struct HexData(pub u8);
+#[nutype(derive(Clone, AsRef))]
+pub(crate) struct HexData(u8);
 
-pub(crate) struct Index(pub usize);
+#[nutype(derive(Clone, AsRef))]
+pub(crate) struct Index(usize);
 
-pub(crate) struct BinData {
-    buf: std::collections::VecDeque<u8>,
-}
+// pub(crate) struct BinData {
+//     buf: std::collections::VecDeque<u8>,
+// }
 
 pub(crate) trait KeyEventHandlerTrait {
     // fn new() -> Self;
@@ -66,22 +68,17 @@ pub(crate) enum Command {
     InputData(CharCode),
 }
 
-trait MiniBufTrait {
+pub(crate) trait MiniBufTrait {
     fn new() -> Self;
     // fn reset_buf(&mut self);
     fn add(&mut self, char_code: CharCode);
     fn data_from_index(&mut self, index: Index);
-    fn to_hex(&self) -> HexData;
+    fn to_hex(&self) -> Result<HexData, std::num::ParseIntError>;
 }
 
 // #[nutype()]
 #[nutype(sanitize(with = |char| char.to_ascii_lowercase()), derive(AsRef, Debug))]
 pub(crate) struct CharCode(char);
-
-pub(crate) struct MiniBuf {
-    buf: [char; 2],
-    index: Index,
-}
 
 trait BinDataIndexTrait {
     fn new() -> Self;

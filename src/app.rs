@@ -1,5 +1,6 @@
-use crate::interfaces::{Command, KeyEventHandlerTrait, WriteModeTrait};
+use crate::interfaces::{Command, KeyEventHandlerTrait, MiniBufTrait, WriteModeTrait};
 use crate::key_event_handler::KeyEventHandler;
+use crate::mini_buf::{self, MiniBuf};
 use crate::tui::TuiMainPanel;
 use crate::write_mode::{self, WriteMode};
 use crate::{
@@ -69,6 +70,9 @@ impl AppTrait for App {
         // 編集データ格納用
         let mut bin_data = BinData::new();
 
+        // 入力用ミニバッファ
+        let mut mini_buf = MiniBuf::new();
+
         // 通知管理
         let mut notice_provider = NoticeProvider::new();
 
@@ -102,6 +106,10 @@ impl AppTrait for App {
                         let message = format!("Saved {}", bin_data.get_file_name().into_inner());
                         notice_provider.add(Notice::new(message));
                     }
+                }
+                Command::InputData(value) => {
+                    mini_buf.add(value);
+                    dbg!(&mini_buf);
                 }
                 _ => {}
             }

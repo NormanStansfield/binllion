@@ -23,7 +23,8 @@ impl BinDataTrait for BinData {
     fn add_data(&mut self, value: HexData) {
         // let mut new_data: std::collections::VecDeque<u8> = std::collections::VecDeque::from(value);
         // let mut new_data: std::collections::VecDeque<HexData> = value.into();
-        let HexData(value) = value;
+        // let HexData(value) = value;
+        let value = value.into_inner();
 
         self.buf.make_contiguous();
         self.buf.push_back(value);
@@ -32,8 +33,9 @@ impl BinDataTrait for BinData {
 
     // データ挿入
     fn insert_data(&mut self, index: Index, value: HexData) {
-        let Index(index) = index;
-        let HexData(value) = value;
+        let index = index.into_inner();
+        // let HexData(value) = value;
+        let value = value.into_inner();
 
         // self.buf.make_contiguous();
         self.buf.insert(index, value);
@@ -42,7 +44,8 @@ impl BinDataTrait for BinData {
 
     // データ削除
     fn delete_data(&mut self, index: Index) {
-        let Index(index) = index;
+        let index = index.into_inner();
+        // let Index(index) = index;
 
         self.buf.make_contiguous();
         if self.buf.len() > 1 {
@@ -53,8 +56,10 @@ impl BinDataTrait for BinData {
 
     // データ上書き
     fn update_data(&mut self, index: Index, value: HexData) {
-        let Index(index) = index;
-        let HexData(value) = value;
+        let index = index.into_inner();
+        // let Index(index) = index;
+        // let HexData(value) = value;
+        let value = value.into_inner();
 
         self.buf.make_contiguous();
         if let Some(elem) = self.buf.get_mut(index) {
