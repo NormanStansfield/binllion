@@ -1,3 +1,5 @@
+use crate::interfaces::KeyEventHandlerTrait;
+use crate::key_event_handler::KeyEventHandler;
 use crate::tui::TuiMainPanel;
 use crate::{
     bin_data::{self, BinData},
@@ -65,25 +67,35 @@ impl AppTrait for App {
 
         // 編集データ格納用
         let mut bin_data = BinData::new();
-        // ratatui::restore();
+
+        // 通知管理
+        let mut notice_provider = NoticeProvider::new();
 
         // ファイルのインポート
         let res = bin_data.import_from(file_path);
-
-        let mut notice_provider = NoticeProvider::new();
-
         if let Err(err) = res {
             // エラーであれば通知する
             let message = err.to_string();
             notice_provider.add(Notice::new(message));
         };
 
-        let mut tui_main_panel = TuiMainPanel::new();
-        tui_main_panel.set_err_msg(notice_provider.get_notice());
-        tui_main_panel.set_title(bin_data.get_file_name());
+        while self.is_running() {
+            let res = KeyEventHandler::handle_key_event();
+            dbg!(&res);
+
+            match res {
+                crate::interfaces::Command::Exit => self.quit(),
+                _ => {}
+            }
+
+            let mut tui_main_panel = TuiMainPanel::new();
+            tui_main_panel.set_err_msg(notice_provider.get_notice());
+            tui_main_panel.set_title(bin_data.get_file_name());
+        }
 
         self.quit();
         ratatui::restore();
+        // dbg!(res);
 
         unimplemented!();
     }

@@ -46,11 +46,12 @@ pub(crate) struct BinData {
     buf: std::collections::VecDeque<u8>,
 }
 
-trait KeyEventHandler {
-    fn new() -> Self;
-    fn handle_key_events() -> Command;
+pub(crate) trait KeyEventHandlerTrait {
+    // fn new() -> Self;
+    fn handle_key_event() -> Command;
 }
 
+#[derive(Debug)]
 pub(crate) enum Command {
     MoveToUp,
     MoveToDown,
@@ -58,9 +59,10 @@ pub(crate) enum Command {
     MoveToRight,
     ChangeWriteMode,
     ImportFile,
-    ExportFIle,
+    ExportFile,
     Exit,
     DeleteData,
+    Nope,
     InputData(CharCode),
 }
 
@@ -72,6 +74,8 @@ trait MiniBufTrait {
     fn to_hex(&self) -> HexData;
 }
 
+// #[nutype()]
+#[nutype(sanitize(with = |char| char.to_ascii_lowercase()), derive(AsRef, Debug))]
 pub(crate) struct CharCode(char);
 
 pub(crate) struct MiniBuf {
