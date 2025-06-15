@@ -98,7 +98,10 @@ impl AppTrait for App {
                         // エラーであれば通知する
                         let message = err.to_string();
                         notice_provider.add(Notice::new(message));
-                    };
+                    } else {
+                        let message = format!("Saved {}", bin_data.get_file_name().into_inner());
+                        notice_provider.add(Notice::new(message));
+                    }
                 }
                 _ => {}
             }
