@@ -73,7 +73,7 @@ impl AppTrait for App {
         let mut notice_provider = NoticeProvider::new();
 
         // ファイルのインポート
-        let res = bin_data.import_from(file_path);
+        let res = bin_data.import_from(file_path.clone());
         if let Err(err) = res {
             // エラーであれば通知する
             let message = err.to_string();
@@ -91,6 +91,14 @@ impl AppTrait for App {
                 Command::Exit => self.quit(),
                 Command::ChangeWriteMode => {
                     write_mode = write_mode.toggle_mode();
+                }
+                Command::ExportFile => {
+                    let res = bin_data.export_to();
+                    if let Err(err) = res {
+                        // エラーであれば通知する
+                        let message = err.to_string();
+                        notice_provider.add(Notice::new(message));
+                    };
                 }
                 _ => {}
             }

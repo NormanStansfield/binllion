@@ -69,7 +69,7 @@ impl BinDataTrait for BinData {
     // }
 
     // ファイルから読み込み
-    fn import_from(&mut self, path: FilePath) -> Result<(), std::io::Error> {
+    fn import_from(&mut self, path: FilePath) -> std::io::Result<()> {
         let file_path = path.into_inner();
         if let Some(os_path) = file_path {
             // ファイルパスがある場合
@@ -90,20 +90,13 @@ impl BinDataTrait for BinData {
     }
 
     // ファイルへ書き込み
-    fn export_to(&self, path: FilePath) -> Result<(), std::io::Error> {
-        let path = path.into_inner();
-        if let Some(path) = path {
-            // ファイルパスがある場合
-            let mut file = std::fs::File::create(path)?;
+    fn export_to(&self) -> std::io::Result<()> {
+        let mut file = std::fs::File::create(&self.path)?;
 
-            let (res, _) = self.buf.as_slices();
+        let (res, _) = self.buf.as_slices();
 
-            file.write_all(res)?;
-            Ok(())
-        } else {
-            // ファイルパスがない場合
-            Ok(())
-        }
+        file.write_all(res)?;
+        Ok(())
     }
 
     fn data_from_index(&mut self, index: Index) -> Result<HexData, ()> {

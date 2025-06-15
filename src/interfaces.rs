@@ -11,15 +11,13 @@ pub(crate) trait NoticeProviderTrait {
     fn get_notice(&mut self) -> Notice;
 }
 
-use std::ffi::OsString;
-
 use nutype::nutype;
 
 use crate::write_mode::WriteMode;
 #[nutype(sanitize(trim), derive(Default), default = "")]
 pub(crate) struct Notice(String);
 
-#[nutype()]
+#[nutype(derive(Clone))]
 pub(crate) struct FilePath(Option<std::ffi::OsString>);
 
 trait CurrentFileTrait {
@@ -34,8 +32,8 @@ pub(crate) trait BinDataTrait {
     fn insert_data(&mut self, index: Index, value: HexData);
     fn delete_data(&mut self, index: Index);
     fn update_data(&mut self, index: Index, value: HexData);
-    fn import_from(&mut self, path: FilePath) -> Result<(), std::io::Error>;
-    fn export_to(&self, path: FilePath) -> Result<(), std::io::Error>;
+    fn import_from(&mut self, path: FilePath) -> std::io::Result<()>;
+    fn export_to(&self) -> std::io::Result<()>;
     fn data_from_index(&mut self, index: Index) -> Result<HexData, ()>;
     fn get_file_name(&self) -> Notice;
 }
