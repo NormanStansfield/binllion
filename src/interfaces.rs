@@ -14,6 +14,8 @@ pub(crate) trait NoticeProviderTrait {
 use std::ffi::OsString;
 
 use nutype::nutype;
+
+use crate::write_mode::WriteMode;
 #[nutype(sanitize(trim), derive(Default), default = "")]
 pub(crate) struct Notice(String);
 
@@ -103,13 +105,9 @@ struct CursorPosition {
     position: ratatui::prelude::Position,
 }
 
-trait WriteModeTrait {
-    fn toggle_mode(&mut self);
-}
-
-pub(crate) enum WriteMode {
-    OverWrite,
-    Insert,
+pub(crate) trait WriteModeTrait {
+    // fn toggle_mode(&mut self);
+    fn toggle_mode(&self) -> WriteMode;
 }
 
 trait TuiLayoutProvider {

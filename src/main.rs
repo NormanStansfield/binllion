@@ -14,6 +14,7 @@ mod bin_data;
 mod key_event_handler;
 mod notice_provider;
 mod tui;
+mod write_mode;
 
 // // イベントハンドラ
 // use crate::event_handler::EventHandler;

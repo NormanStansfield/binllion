@@ -1,6 +1,7 @@
-use crate::interfaces::KeyEventHandlerTrait;
+use crate::interfaces::{Command, KeyEventHandlerTrait, WriteModeTrait};
 use crate::key_event_handler::KeyEventHandler;
 use crate::tui::TuiMainPanel;
+use crate::write_mode::{self, WriteMode};
 use crate::{
     bin_data::{self, BinData},
     interfaces::{
@@ -79,18 +80,26 @@ impl AppTrait for App {
             notice_provider.add(Notice::new(message));
         };
 
+        // 書き込みモード
+        let mut write_mode = WriteMode::Insert;
+
         while self.is_running() {
             let res = KeyEventHandler::handle_key_event();
             dbg!(&res);
 
             match res {
-                crate::interfaces::Command::Exit => self.quit(),
+                Command::Exit => self.quit(),
+                Command::ChangeWriteMode => {
+                    write_mode = write_mode.toggle_mode();
+                }
                 _ => {}
             }
+            dbg!(&write_mode);
 
             let mut tui_main_panel = TuiMainPanel::new();
             tui_main_panel.set_err_msg(notice_provider.get_notice());
             tui_main_panel.set_title(bin_data.get_file_name());
+            tui_main_panel.set_mode(write_mode.clone());
         }
 
         self.quit();
