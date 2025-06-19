@@ -1,4 +1,4 @@
-use crate::interfaces::{CharCode, HexData, Index, MiniBufTrait};
+use crate::interfaces::{CharCode, HexData, Index, MiniBufPosition, MiniBufTrait};
 
 #[derive(Debug)]
 pub(crate) struct MiniBuf {
@@ -13,10 +13,12 @@ impl MiniBufTrait for MiniBuf {
         Self { buf, index }
     }
 
-    fn add(&mut self, char_code: CharCode) {
+    fn add(&mut self, char_code: CharCode) -> MiniBufPosition {
         let value = char_code.into_inner();
         self.buf[self.index] = value.to_ascii_uppercase();
         self.index = (self.index + 1) % 2;
+
+        self.get_position()
     }
 
     fn updata(&mut self, value: HexData) {
@@ -26,7 +28,7 @@ impl MiniBufTrait for MiniBuf {
 
         self.index = 0;
         for char_code in str.chars() {
-            self.add(CharCode::new(char_code));
+            let _ = self.add(CharCode::new(char_code));
         }
         self.index = 0;
     }
@@ -40,7 +42,11 @@ impl MiniBufTrait for MiniBuf {
         }
     }
 
-    fn get_position(&self) -> Index {
-        Index::new(self.index)
+    fn get_position(&self) -> MiniBufPosition {
+        match &self.index {
+            0 => MiniBufPosition::Head,
+            1 => MiniBufPosition::Tail,
+            _ => unreachable!(),
+        }
     }
 }

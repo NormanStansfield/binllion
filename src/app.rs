@@ -1,5 +1,6 @@
 use crate::interfaces::{
-    BinDataIndexTrait, Command, HexData, KeyEventHandlerTrait, MiniBufTrait, WriteModeTrait,
+    BinDataIndexTrait, Command, HexData, KeyEventHandlerTrait, MiniBufPosition, MiniBufTrait,
+    WriteModeTrait,
 };
 use crate::key_event_handler::KeyEventHandler;
 use crate::mini_buf::{self, MiniBuf};
@@ -116,7 +117,24 @@ impl AppTrait for App {
                     }
                 }
                 Command::InputData(value) => {
-                    mini_buf.add(value);
+                    let pos = mini_buf.add(value);
+                    match write_mode {
+                        WriteMode::OverWrite => {
+                            let res = mini_buf.to_hex();
+                            if let Ok(value) = res {
+                                let index = bin_data_index.index();
+                                bin_data.update_data(index, value);
+                            }
+                        }
+                        WriteMode::Insert if pos == MiniBufPosition::Tail => {
+                            let res = mini_buf.to_hex();
+                            if let Ok(value) = res {
+                                let index = bin_data_index.index();
+                                bin_data.insert_data(index, value);
+                            }
+                        }
+                        WriteMode::Insert => {}
+                    }
                     dbg!(&mini_buf);
                 }
                 Command::MoveToUp => {

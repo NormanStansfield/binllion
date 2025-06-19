@@ -72,10 +72,16 @@ pub(crate) enum Command {
 pub(crate) trait MiniBufTrait {
     fn new() -> Self;
     // fn reset_buf(&mut self);
-    fn add(&mut self, char_code: CharCode);
+    fn add(&mut self, char_code: CharCode) -> MiniBufPosition;
     fn updata(&mut self, value: HexData);
     fn to_hex(&self) -> Result<HexData, std::num::ParseIntError>;
-    fn get_position(&self) -> Index;
+    fn get_position(&self) -> MiniBufPosition;
+}
+
+#[derive(PartialEq)]
+pub(crate) enum MiniBufPosition {
+    Head,
+    Tail,
 }
 
 // #[nutype()]

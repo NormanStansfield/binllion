@@ -37,7 +37,7 @@ impl BinDataTrait for BinData {
         // let HexData(value) = value;
         let value = value.into_inner();
 
-        // self.buf.make_contiguous();
+        self.buf.make_contiguous();
         self.buf.insert(index, value);
         self.buf.make_contiguous();
     }
