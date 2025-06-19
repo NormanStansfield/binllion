@@ -20,7 +20,16 @@ impl MiniBufTrait for MiniBuf {
     }
 
     fn updata(&mut self, value: HexData) {
-        todo!()
+        let value = value.into_inner();
+        // 16進数へ変換
+        let str = format!("{:02X}", value);
+
+        self.index = 0;
+        for char_code in str.chars() {
+            self.add(CharCode::new(char_code));
+        }
+        self.index = 0;
+
     }
 
     fn to_hex(&self) -> Result<HexData, std::num::ParseIntError> {

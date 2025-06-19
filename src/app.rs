@@ -164,8 +164,11 @@ impl AppTrait for App {
                     }
                 }
                 Command::ImportFile => todo!(),
-                Command::DeleteData => todo!(),
-                Command::Nop => todo!(),
+                Command::DeleteData => {
+                    let index = bin_data_index.index();
+                    bin_data.delete_data(index);
+                }
+                Command::Nop => {}
             }
             dbg!(&write_mode);
 

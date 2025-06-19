@@ -105,7 +105,13 @@ impl BinDataTrait for BinData {
     }
 
     fn get_data(&self, index: Index) -> Result<HexData, ()> {
-        unimplemented!();
+        let index = index.into_inner();
+        let res = self.buf.get(index);
+        if let Some(value) = res {
+            Ok(HexData::new(*value))
+        } else {
+            Err(())
+        }
     }
 
     fn get_file_name(&self) -> Notice {
