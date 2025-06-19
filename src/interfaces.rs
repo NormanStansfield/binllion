@@ -75,6 +75,7 @@ pub(crate) trait MiniBufTrait {
     fn add(&mut self, char_code: CharCode);
     fn updata(&mut self, value: HexData);
     fn to_hex(&self) -> Result<HexData, std::num::ParseIntError>;
+    fn get_position(&self) -> Index;
 }
 
 // #[nutype()]

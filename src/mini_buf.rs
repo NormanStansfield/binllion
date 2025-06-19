@@ -29,7 +29,6 @@ impl MiniBufTrait for MiniBuf {
             self.add(CharCode::new(char_code));
         }
         self.index = 0;
-
     }
 
     fn to_hex(&self) -> Result<HexData, std::num::ParseIntError> {
@@ -39,5 +38,9 @@ impl MiniBufTrait for MiniBuf {
             Ok(value) => Ok(HexData::new(value)),
             Err(value) => Err(value),
         }
+    }
+
+    fn get_position(&self) -> Index {
+        Index::new(self.index)
     }
 }
