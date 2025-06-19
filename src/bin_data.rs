@@ -104,7 +104,7 @@ impl BinDataTrait for BinData {
         Ok(())
     }
 
-    fn data_from_index(&mut self, index: Index) -> Result<HexData, ()> {
+    fn get_data(&self, index: Index) -> Result<HexData, ()> {
         unimplemented!();
     }
 
@@ -122,6 +122,10 @@ impl BinDataTrait for BinData {
         } else {
             Notice::new(file_name)
         }
+    }
+
+    fn get_size(&self) -> Index {
+        Index::new(self.buf.len())
     }
 }
 

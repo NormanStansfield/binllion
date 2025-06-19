@@ -13,6 +13,7 @@ use app::App;
 mod bin_data;
 mod key_event_handler;
 mod mini_buf;
+mod mini_buf_index;
 mod notice_provider;
 mod tui;
 mod write_mode;

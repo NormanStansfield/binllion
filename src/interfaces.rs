@@ -34,8 +34,9 @@ pub(crate) trait BinDataTrait {
     fn update_data(&mut self, index: Index, value: HexData);
     fn import_from(&mut self, path: FilePath) -> std::io::Result<()>;
     fn export_to(&self) -> std::io::Result<()>;
-    fn data_from_index(&mut self, index: Index) -> Result<HexData, ()>;
+    fn get_data(&self, index: Index) -> Result<HexData, ()>;
     fn get_file_name(&self) -> Notice;
+    fn get_size(&self) -> Index;
 }
 
 #[nutype(derive(Clone, AsRef))]
@@ -64,7 +65,7 @@ pub(crate) enum Command {
     ExportFile,
     Exit,
     DeleteData,
-    Nope,
+    Nop,
     InputData(CharCode),
 }
 
@@ -72,7 +73,7 @@ pub(crate) trait MiniBufTrait {
     fn new() -> Self;
     // fn reset_buf(&mut self);
     fn add(&mut self, char_code: CharCode);
-    fn data_from_index(&mut self, index: Index);
+    fn updata(&mut self, value: HexData);
     fn to_hex(&self) -> Result<HexData, std::num::ParseIntError>;
 }
 
@@ -80,14 +81,15 @@ pub(crate) trait MiniBufTrait {
 #[nutype(sanitize(with = |char| char.to_ascii_lowercase()), derive(AsRef, Debug))]
 pub(crate) struct CharCode(char);
 
-trait BinDataIndexTrait {
+pub(crate) trait BinDataIndexTrait {
     fn new() -> Self;
-    fn index(&self) -> Self;
-    fn move_to_right(&mut self) -> Self;
-    fn move_to_left(&mut self) -> Self;
-    fn move_to_up(&mut self) -> Self;
-    fn move_to_down(&mut self) -> Self;
+    fn index(&self) -> Index;
+    fn move_to_right(&mut self) -> Index;
+    fn move_to_left(&mut self) -> Index;
+    fn move_to_up(&mut self) -> Index;
+    fn move_to_down(&mut self) -> Index;
     fn reset_index(&mut self);
+    fn set_size(&mut self, value: Index);
 }
 
 trait CursorPositionTrait {

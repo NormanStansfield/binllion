@@ -106,19 +106,19 @@ impl KeyEventHandlerTrait for KeyEventHandler {
                     // 矢印キー等制御文字は対象外
                     _ => {
                         // todo!()
-                        Command::Nope
+                        Command::Nop
                     }
                 }
             }
             // エラーの場合
             Err(err) => {
                 println!("Error: {}", err);
-                Command::Nope
+                Command::Nop
             }
             // その他入力（マウス等）
             _ => {
                 // todo!()
-                Command::Nope
+                Command::Nop
             }
         }
     }

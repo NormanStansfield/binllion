@@ -19,7 +19,7 @@ impl MiniBufTrait for MiniBuf {
         self.index = (self.index + 1) % 2;
     }
 
-    fn data_from_index(&mut self, index: Index) {
+    fn updata(&mut self, value: HexData) {
         todo!()
     }
 

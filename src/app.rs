@@ -1,6 +1,9 @@
-use crate::interfaces::{Command, KeyEventHandlerTrait, MiniBufTrait, WriteModeTrait};
+use crate::interfaces::{
+    BinDataIndexTrait, Command, HexData, KeyEventHandlerTrait, MiniBufTrait, WriteModeTrait,
+};
 use crate::key_event_handler::KeyEventHandler;
 use crate::mini_buf::{self, MiniBuf};
+use crate::mini_buf_index::BinDataIndex;
 use crate::tui::TuiMainPanel;
 use crate::write_mode::{self, WriteMode};
 use crate::{
@@ -70,6 +73,9 @@ impl AppTrait for App {
         // 編集データ格納用
         let mut bin_data = BinData::new();
 
+        // 編集データインデックス
+        let mut bin_data_index = BinDataIndex::new();
+
         // 入力用ミニバッファ
         let mut mini_buf = MiniBuf::new();
 
@@ -88,6 +94,8 @@ impl AppTrait for App {
         let mut write_mode = WriteMode::Insert;
 
         while self.is_running() {
+            bin_data_index.set_size(bin_data.get_size());
+
             let res = KeyEventHandler::handle_key_event();
             dbg!(&res);
 
@@ -111,7 +119,53 @@ impl AppTrait for App {
                     mini_buf.add(value);
                     dbg!(&mini_buf);
                 }
-                _ => {}
+                Command::MoveToUp => {
+                    let index = bin_data_index.move_to_up();
+                    match write_mode {
+                        WriteMode::OverWrite => {
+                            if let Ok(value) = bin_data.get_data(index) {
+                                mini_buf.updata(value);
+                            }
+                        }
+                        WriteMode::Insert => mini_buf.updata(HexData::new(0)),
+                    }
+                }
+                Command::MoveToDown => {
+                    let index = bin_data_index.move_to_down();
+                    match write_mode {
+                        WriteMode::OverWrite => {
+                            if let Ok(value) = bin_data.get_data(index) {
+                                mini_buf.updata(value);
+                            }
+                        }
+                        WriteMode::Insert => mini_buf.updata(HexData::new(0)),
+                    }
+                }
+                Command::MoveToLeft => {
+                    let index = bin_data_index.move_to_left();
+                    match write_mode {
+                        WriteMode::OverWrite => {
+                            if let Ok(value) = bin_data.get_data(index) {
+                                mini_buf.updata(value);
+                            }
+                        }
+                        WriteMode::Insert => mini_buf.updata(HexData::new(0)),
+                    }
+                }
+                Command::MoveToRight => {
+                    let index = bin_data_index.move_to_right();
+                    match write_mode {
+                        WriteMode::OverWrite => {
+                            if let Ok(value) = bin_data.get_data(index) {
+                                mini_buf.updata(value);
+                            }
+                        }
+                        WriteMode::Insert => mini_buf.updata(HexData::new(0)),
+                    }
+                }
+                Command::ImportFile => todo!(),
+                Command::DeleteData => todo!(),
+                Command::Nop => todo!(),
             }
             dbg!(&write_mode);
 
