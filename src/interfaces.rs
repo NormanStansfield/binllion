@@ -36,7 +36,8 @@ pub(crate) trait BinDataTrait {
     fn export_to(&self) -> std::io::Result<()>;
     fn get_data(&self, index: Index) -> Result<HexData, ()>;
     fn get_file_name(&self) -> Notice;
-    fn get_size(&self) -> Index;
+    fn get_size(&mut self) -> Index;
+    fn get_slice(&mut self) -> Vec<u8>;
 }
 
 #[nutype(derive(Clone, AsRef))]
@@ -114,33 +115,39 @@ pub(crate) trait WriteModeTrait {
     fn toggle_mode(&self) -> WriteMode;
 }
 
-trait TuiLayoutProvider {
-    fn get_layout() -> TuiLayout;
+pub(crate) trait TuiLayoutProviderTrait {
+    fn get_layout(terminal: &mut ratatui::DefaultTerminal) -> TuiLayout;
 }
 
-struct TuiLayout {
-    main_panel: TuiArea,
-    main_header: TuiArea,
-    main_content: TuiArea,
-    ascii_panel: TuiArea,
-    ascii_header: TuiArea,
-    ascii_content: TuiArea,
-    versatile: TuiArea,
+pub(crate) struct TuiLayout {
+    pub(crate) main_panel: TuiArea,
+    pub(crate) main_header: TuiArea,
+    pub(crate) main_content: TuiArea,
+    pub(crate) ascii_panel: TuiArea,
+    pub(crate) ascii_header: TuiArea,
+    pub(crate) ascii_content: TuiArea,
+    pub(crate) versatile: TuiArea,
 }
 
+#[nutype(derive(Clone, AsRef))]
 pub(crate) struct TuiArea(ratatui::prelude::Rect);
 
 pub(crate) trait TuiPanelCommonTrait {
     fn new() -> Self;
-    fn set_layout(layout: TuiArea);
-    fn draw(&mut self, terminal: &mut ratatui::DefaultTerminal);
+    // fn set_layout(&mut self, layout: TuiLayout);
+    // fn set_layout(&mut self, layout: TuiArea);
+    // fn draw(&mut self, terminal: &mut ratatui::DefaultTerminal);
 }
 
 pub(crate) trait TuiMainPanelTrait {
     fn set_title(&mut self, title: Notice);
     fn set_err_msg(&mut self, message: Notice);
     fn set_mode(&mut self, mode: WriteMode);
-    fn set_content(bin_data: &[u8]);
+    // fn set_content(&mut self, bin_data: Vec<u8>);
+}
+
+pub(crate) trait TuiMainContentTrait {
+    fn set_content(&mut self, bin_data: Vec<u8>);
 }
 
 // pub(crate) struct ErrorMessage(String);

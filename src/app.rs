@@ -1,11 +1,11 @@
 use crate::interfaces::{
     BinDataIndexTrait, Command, HexData, KeyEventHandlerTrait, MiniBufPosition, MiniBufTrait,
-    WriteModeTrait,
+    TuiLayoutProviderTrait, TuiMainContentTrait, WriteModeTrait,
 };
 use crate::key_event_handler::KeyEventHandler;
 use crate::mini_buf::{self, MiniBuf};
 use crate::mini_buf_index::BinDataIndex;
-use crate::tui::TuiMainPanel;
+use crate::tui::{self, TuiHexHeaderLabel, TuiMainContent, TuiMainPanel};
 use crate::write_mode::{self, WriteMode};
 use crate::{
     bin_data::{self, BinData},
@@ -89,6 +89,10 @@ impl AppTrait for App {
             // エラーであれば通知する
             let message = err.to_string();
             notice_provider.add(Notice::new(message));
+            bin_data = BinData::new();
+            bin_data.add_data(HexData::new(0));
+        } else {
+            bin_data.add_data(HexData::new(0));
         };
 
         // 書き込みモード
@@ -97,8 +101,26 @@ impl AppTrait for App {
         while self.is_running() {
             bin_data_index.set_size(bin_data.get_size());
 
+            let layout = crate::tui::TuiLayoutProvider::get_layout(&mut self.terminal);
+
+            let mut tui_main_panel = TuiMainPanel::new();
+            tui_main_panel.set_err_msg(notice_provider.get_notice());
+            tui_main_panel.set_title(bin_data.get_file_name());
+            tui_main_panel.set_mode(write_mode.clone());
+
+            let mut tui_main_content = TuiMainContent::new();
+            tui_main_content.set_content(bin_data.get_slice());
+
+            // 描画
+            let _ = self.terminal.draw(|frame| {
+                // メインパネルを描画
+                frame.render_widget(tui_main_panel, layout.main_panel.into_inner());
+                frame.render_widget(TuiHexHeaderLabel, layout.main_header.into_inner());
+                frame.render_widget(tui_main_content, layout.main_content.into_inner());
+            });
+
             let res = KeyEventHandler::handle_key_event();
-            dbg!(&res);
+            // dbg!(&res);
 
             match res {
                 Command::Exit => self.quit(),
@@ -135,7 +157,7 @@ impl AppTrait for App {
                         }
                         WriteMode::Insert => {}
                     }
-                    dbg!(&mini_buf);
+                    // dbg!(&mini_buf);
                 }
                 Command::MoveToUp => {
                     let index = bin_data_index.move_to_up();
@@ -188,12 +210,7 @@ impl AppTrait for App {
                 }
                 Command::Nop => {}
             }
-            dbg!(&write_mode);
-
-            let mut tui_main_panel = TuiMainPanel::new();
-            tui_main_panel.set_err_msg(notice_provider.get_notice());
-            tui_main_panel.set_title(bin_data.get_file_name());
-            tui_main_panel.set_mode(write_mode.clone());
+            // dbg!(&write_mode);
         }
 
         self.quit();

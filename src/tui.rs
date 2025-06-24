@@ -2,7 +2,11 @@
 
 // モジュールファイルの読み込み
 mod converter;
+mod layout_provider;
 mod main_panel;
+pub(crate) use layout_provider::TuiLayoutProvider;
+pub(crate) use main_panel::TuiHexHeaderLabel;
+pub(crate) use main_panel::TuiMainContent;
 pub(crate) use main_panel::TuiMainPanel;
 
 // 標準ライブラリ
