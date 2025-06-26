@@ -38,7 +38,7 @@ impl MiniBufTrait for MiniBuf {
         let res = u8::from_str_radix(&str, 16);
         match res {
             Ok(value) => Ok(HexData::new(value)),
-            Err(value) => Err(value),
+            Err(err) => Err(err),
         }
     }
 

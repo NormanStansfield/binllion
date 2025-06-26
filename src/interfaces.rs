@@ -12,8 +12,9 @@ pub(crate) trait NoticeProviderTrait {
 }
 
 use nutype::nutype;
+use ratatui::prelude::Position;
 
-use crate::write_mode::WriteMode;
+use crate::{mini_buf, write_mode::WriteMode};
 #[nutype(sanitize(trim), derive(Default), default = "")]
 pub(crate) struct Notice(String);
 
@@ -38,6 +39,7 @@ pub(crate) trait BinDataTrait {
     fn get_file_name(&self) -> Notice;
     fn get_size(&mut self) -> Index;
     fn get_slice(&mut self) -> Vec<u8>;
+    fn set_path(&mut self, path: FilePath);
 }
 
 #[nutype(derive(Clone, AsRef))]
@@ -96,22 +98,20 @@ pub(crate) trait BinDataIndexTrait {
     fn move_to_left(&mut self) -> Index;
     fn move_to_up(&mut self) -> Index;
     fn move_to_down(&mut self) -> Index;
-    fn reset_index(&mut self);
+    // fn reset_index(&mut self);
     fn set_size(&mut self, value: Index);
+    fn get_position(&self) -> CursorPosition;
 }
 
-trait CursorPositionTrait {
-    fn show_cursor(&self, terminal: &mut ratatui::DefaultTerminal);
+pub(crate) trait CursorPositionTrait {
+    fn with_mini_buf_position(
+        position: CursorPosition,
+        mini_buf_position: MiniBufPosition,
+    ) -> CursorPosition;
 }
-struct CursorPosition {
-    // const STEP: usize = 3,
-    // const ORIGIN_X: u16 = 10,
-    // const ORIGIN_Y: u16 = 2,
-    position: ratatui::prelude::Position,
-}
+pub(crate) struct CursorPosition(pub(crate) Position);
 
 pub(crate) trait WriteModeTrait {
-    // fn toggle_mode(&mut self);
     fn toggle_mode(&self) -> WriteMode;
 }
 

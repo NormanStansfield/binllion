@@ -1,10 +1,10 @@
+use crate::bin_data_index::BinDataIndex;
 use crate::interfaces::{
-    BinDataIndexTrait, Command, HexData, KeyEventHandlerTrait, MiniBufPosition, MiniBufTrait,
-    TuiLayoutProviderTrait, TuiMainContentTrait, WriteModeTrait,
+    BinDataIndexTrait, Command, CursorPosition, CursorPositionTrait, HexData, KeyEventHandlerTrait,
+    MiniBufPosition, MiniBufTrait, TuiLayoutProviderTrait, TuiMainContentTrait, WriteModeTrait,
 };
 use crate::key_event_handler::KeyEventHandler;
 use crate::mini_buf::{self, MiniBuf};
-use crate::mini_buf_index::BinDataIndex;
 use crate::tui::{self, TuiHexHeaderLabel, TuiMainContent, TuiMainPanel};
 use crate::write_mode::{self, WriteMode};
 use crate::{
@@ -90,10 +90,9 @@ impl AppTrait for App {
             let message = err.to_string();
             notice_provider.add(Notice::new(message));
             bin_data = BinData::new();
-            bin_data.add_data(HexData::new(0));
-        } else {
-            bin_data.add_data(HexData::new(0));
-        };
+            // 新規ファイルとしてファイルパスをセットする
+            bin_data.set_path(file_path);
+        }
 
         // 書き込みモード
         let mut write_mode = WriteMode::Insert;
@@ -103,11 +102,14 @@ impl AppTrait for App {
 
             let layout = crate::tui::TuiLayoutProvider::get_layout(&mut self.terminal);
 
+            // メインパネル
             let mut tui_main_panel = TuiMainPanel::new();
             tui_main_panel.set_err_msg(notice_provider.get_notice());
             tui_main_panel.set_title(bin_data.get_file_name());
             tui_main_panel.set_mode(write_mode.clone());
 
+            // メインパネル - コンテンツ
+            // 修正必要
             let mut tui_main_content = TuiMainContent::new();
             tui_main_content.set_content(bin_data.get_slice());
 
@@ -118,6 +120,14 @@ impl AppTrait for App {
                 frame.render_widget(TuiHexHeaderLabel, layout.main_header.into_inner());
                 frame.render_widget(tui_main_content, layout.main_content.into_inner());
             });
+
+            // カーソル表示
+            let CursorPosition(position) = CursorPosition::with_mini_buf_position(
+                bin_data_index.get_position(),
+                mini_buf.get_position(),
+            );
+            let _ = self.terminal.set_cursor_position(position);
+            let _ = self.terminal.show_cursor();
 
             let res = KeyEventHandler::handle_key_event();
             // dbg!(&res);
@@ -137,27 +147,6 @@ impl AppTrait for App {
                         let message = format!("Saved {}", bin_data.get_file_name().into_inner());
                         notice_provider.add(Notice::new(message));
                     }
-                }
-                Command::InputData(value) => {
-                    let pos = mini_buf.add(value);
-                    match write_mode {
-                        WriteMode::OverWrite => {
-                            let res = mini_buf.to_hex();
-                            if let Ok(value) = res {
-                                let index = bin_data_index.index();
-                                bin_data.update_data(index, value);
-                            }
-                        }
-                        WriteMode::Insert if pos == MiniBufPosition::Tail => {
-                            let res = mini_buf.to_hex();
-                            if let Ok(value) = res {
-                                let index = bin_data_index.index();
-                                bin_data.insert_data(index, value);
-                            }
-                        }
-                        WriteMode::Insert => {}
-                    }
-                    // dbg!(&mini_buf);
                 }
                 Command::MoveToUp => {
                     let index = bin_data_index.move_to_up();
@@ -208,6 +197,35 @@ impl AppTrait for App {
                     let index = bin_data_index.index();
                     bin_data.delete_data(index);
                 }
+                Command::InputData(value) => {
+                    let pos = mini_buf.add(value);
+                    match write_mode {
+                        WriteMode::OverWrite => {
+                            let res = mini_buf.to_hex();
+                            if let Ok(value) = res {
+                                let index = bin_data_index.index();
+                                bin_data.update_data(index, value);
+                            }
+                        }
+                        WriteMode::Insert if pos == MiniBufPosition::Head => {
+                            let res = mini_buf.to_hex();
+                            if let Ok(value) = res {
+                                let index = bin_data_index.index();
+                                bin_data.update_data(index, value);
+                                mini_buf.updata(HexData::new(0));
+                            }
+                        }
+                        WriteMode::Insert if pos == MiniBufPosition::Tail => {
+                            let res = mini_buf.to_hex();
+                            if let Ok(value) = res {
+                                let index = bin_data_index.index();
+                                bin_data.insert_data(index, value);
+                            }
+                        }
+                        WriteMode::Insert => unreachable!(),
+                    }
+                    // dbg!(&mini_buf);
+                }
                 Command::Nop => {}
             }
             // dbg!(&write_mode);
@@ -217,6 +235,6 @@ impl AppTrait for App {
         ratatui::restore();
         // dbg!(res);
 
-        unimplemented!();
+        // unimplemented!();
     }
 }

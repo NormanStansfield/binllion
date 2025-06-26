@@ -1,6 +1,12 @@
-use crate::interfaces::{BinDataIndexTrait, Index};
+use ratatui::layout::Position;
 
-const LINE_LEN: usize = 16;
+use crate::interfaces::BinDataIndexTrait;
+use crate::{
+    constants,
+    interfaces::{CursorPosition, Index},
+};
+
+// const LINE_LEN: usize = 16;
 
 pub(crate) struct BinDataIndex {
     index: usize,
@@ -31,21 +37,31 @@ impl BinDataIndexTrait for BinDataIndex {
     }
 
     fn move_to_up(&mut self) -> Index {
-        self.index = self.index.saturating_sub(LINE_LEN);
+        self.index = self.index.saturating_sub(constants::LINE_LEN);
         Index::new(self.index)
     }
 
     fn move_to_down(&mut self) -> Index {
-        self.index = self.index.saturating_add(LINE_LEN);
+        self.index = self.index.saturating_add(constants::LINE_LEN);
+        if self.index > self.size {
+            self.index = self.size;
+        }
         Index::new(self.index)
     }
 
-    fn reset_index(&mut self) {
-        self.index = 0;
-    }
+    // fn reset_index(&mut self) {
+    //     self.index = 0;
+    // }
 
     fn set_size(&mut self, value: Index) {
         let value = value.into_inner();
         self.size = value;
+    }
+
+    fn get_position(&self) -> CursorPosition {
+        let x = constants::ORIGIN_X + (constants::STEP * (self.index % constants::LINE_LEN)) as u16;
+        let y = constants::ORIGIN_Y + (self.index / constants::LINE_LEN) as u16;
+
+        CursorPosition(Position::new(x, y))
     }
 }

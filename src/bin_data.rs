@@ -140,6 +140,13 @@ impl BinDataTrait for BinData {
         let (res, _) = self.buf.as_slices();
         res[0..].to_vec() // 将来、スクロール量を考慮したIndexの値を使用する
     }
+
+    fn set_path(&mut self, path: FilePath) {
+        let file_path = path.into_inner();
+        if let Some(os_path) = file_path {
+            self.path = os_path;
+        }
+    }
 }
 
 // Vec<u8>から編集データへ変換
