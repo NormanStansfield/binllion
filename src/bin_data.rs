@@ -1,8 +1,10 @@
 use crate::interfaces::{BinDataTrait, FilePath, HexData, Index, Notice};
+
 use std::{
     collections::VecDeque,
     ffi::OsString,
     io::{Read, Write},
+    ops::Range,
 };
 
 // 編集用構造体
@@ -115,8 +117,6 @@ impl BinDataTrait for BinData {
     }
 
     fn get_file_name(&self) -> Notice {
-        // todo!()
-        // Notice::new(self.path.to_string_lossy());
         let file_name = std::path::Path::new(&self.path)
             .file_name()
             .map(|name| name.to_string_lossy().to_string())
@@ -135,10 +135,19 @@ impl BinDataTrait for BinData {
         Index::new(self.buf.len())
     }
 
-    fn get_slice(&mut self) -> Vec<u8> {
+    fn get_slice(&mut self, range: Range<usize>) -> Vec<u8> {
+        let start = range.start;
+
         self.buf.make_contiguous();
-        let (res, _) = self.buf.as_slices();
-        res[0..].to_vec() // 将来、スクロール量を考慮したIndexの値を使用する
+        let (buf, _) = self.buf.as_slices();
+
+        let res = if let Some(value) = buf.get(range) {
+            value
+        } else {
+            buf.get(start..).unwrap()
+        };
+
+        res.to_vec()
     }
 
     fn set_path(&mut self, path: FilePath) {

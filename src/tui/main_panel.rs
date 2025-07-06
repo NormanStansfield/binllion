@@ -1,7 +1,7 @@
-use ratatui::layout::{self, Rect};
+use ratatui::layout::Rect;
 use ratatui::prelude::Stylize;
 use ratatui::text::Text;
-use ratatui::widgets::{self, Clear, Paragraph, Widget};
+use ratatui::widgets::{Clear, Paragraph, Widget};
 use ratatui::{
     symbols::border,
     text::Line,
@@ -9,9 +9,7 @@ use ratatui::{
 };
 
 use crate::constants;
-use crate::interfaces::{
-    Notice, TuiArea, TuiLayout, TuiMainContentTrait, TuiMainPanelTrait, TuiPanelCommonTrait,
-};
+use crate::interfaces::{Notice, TuiMainContentTrait, TuiMainPanelTrait};
 use crate::tui::converter::{Converter, ForHex};
 use crate::write_mode::WriteMode;
 
@@ -21,8 +19,8 @@ pub(crate) struct TuiMainPanel {
     mode: WriteMode,
 }
 
-impl TuiPanelCommonTrait for TuiMainPanel {
-    fn new() -> Self {
+impl TuiMainPanel {
+    pub(crate) fn new() -> Self {
         Self {
             message: String::from(""),
             title: String::from(""),
@@ -86,7 +84,7 @@ impl Widget for TuiHexHeaderLabel {
         let hex_header = Line::from(format!(
             "{:width$} +0 +1 +2 +3 +4 +5 +6 +7 +8 +9 +A +B +C +D +E +F",
             " ",
-            width = 8
+            width = constants::ADDRESS_WIDTH,
         ))
         .magenta();
         hex_header.render(area, buf);

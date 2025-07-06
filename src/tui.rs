@@ -4,11 +4,12 @@
 mod converter;
 mod layout_provider;
 mod main_panel;
+mod window;
 pub(crate) use layout_provider::TuiLayoutProvider;
 pub(crate) use main_panel::TuiHexHeaderLabel;
 pub(crate) use main_panel::TuiMainContent;
 pub(crate) use main_panel::TuiMainPanel;
-
+pub(crate) use window::Window;
 // 標準ライブラリ
 // use std::io::{self};
 // // ratatuiクレート

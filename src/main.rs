@@ -12,7 +12,6 @@ use app::App;
 
 mod bin_data;
 mod bin_data_index;
-mod cursor_position;
 mod key_event_handler;
 mod mini_buf;
 mod notice_provider;

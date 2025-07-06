@@ -1,17 +1,24 @@
 use crate::bin_data_index::BinDataIndex;
 use crate::interfaces::{
-    BinDataIndexTrait, Command, CursorPosition, CursorPositionTrait, HexData, KeyEventHandlerTrait,
-    MiniBufPosition, MiniBufTrait, TuiLayoutProviderTrait, TuiMainContentTrait, WriteModeTrait,
+    BinDataIndexTrait, Command, HexData, KeyEventHandlerTrait, MiniBufPosition, MiniBufTrait,
+    TuiArea, TuiLayoutProviderTrait, TuiMainContentTrait, ViewPosition, WindowTrait,
+    WriteModeTrait,
 };
 use crate::key_event_handler::KeyEventHandler;
 use crate::mini_buf::{self, MiniBuf};
+use crate::tui::Window;
 use crate::tui::{self, TuiHexHeaderLabel, TuiMainContent, TuiMainPanel};
 use crate::write_mode::{self, WriteMode};
 use crate::{
     bin_data::{self, BinData},
     interfaces::{
-        AppTrait, BinDataTrait, FilePath, Notice, NoticeProviderTrait, TuiMainPanelTrait,
-        TuiPanelCommonTrait,
+        AppTrait,
+        BinDataTrait,
+        FilePath,
+        Notice,
+        NoticeProviderTrait,
+        TuiMainPanelTrait,
+        // TuiPanelCommonTrait,
     },
     notice_provider::{self, NoticeProvider},
 };
@@ -97,10 +104,17 @@ impl AppTrait for App {
         // 書き込みモード
         let mut write_mode = WriteMode::Insert;
 
+        // カーソル管理
+        let mut window = Window::new();
+
         while self.is_running() {
             bin_data_index.set_size(bin_data.get_size());
 
+            // 領域レイアウト取得
             let layout = crate::tui::TuiLayoutProvider::get_layout(&mut self.terminal);
+
+            // カーソル移動領域を取得
+            let range = window.get_range(layout.main_content.clone());
 
             // メインパネル
             let mut tui_main_panel = TuiMainPanel::new();
@@ -109,23 +123,29 @@ impl AppTrait for App {
             tui_main_panel.set_mode(write_mode.clone());
 
             // メインパネル - コンテンツ
-            // 修正必要
             let mut tui_main_content = TuiMainContent::new();
-            tui_main_content.set_content(bin_data.get_slice());
+            tui_main_content.set_content(bin_data.get_slice(range));
 
             // 描画
             let _ = self.terminal.draw(|frame| {
                 // メインパネルを描画
                 frame.render_widget(tui_main_panel, layout.main_panel.into_inner());
                 frame.render_widget(TuiHexHeaderLabel, layout.main_header.into_inner());
-                frame.render_widget(tui_main_content, layout.main_content.into_inner());
+
+                frame.render_widget(tui_main_content, layout.main_content.clone().into_inner());
             });
 
             // カーソル表示
-            let CursorPosition(position) = CursorPosition::with_mini_buf_position(
-                bin_data_index.get_position(),
+            let position = Window::with_mini_buf_position(
+                window.get_view_position(
+                    bin_data_index.get_current_line(),
+                    layout.main_content.clone(),
+                    bin_data_index.get_position(),
+                ),
                 mini_buf.get_position(),
             );
+
+            let ViewPosition(position) = position;
             let _ = self.terminal.set_cursor_position(position);
             let _ = self.terminal.show_cursor();
 
@@ -150,6 +170,7 @@ impl AppTrait for App {
                 }
                 Command::MoveToUp => {
                     let index = bin_data_index.move_to_up();
+                    window.move_to_up(bin_data_index.get_current_line());
                     match write_mode {
                         WriteMode::OverWrite => {
                             if let Ok(value) = bin_data.get_data(index) {
@@ -161,6 +182,11 @@ impl AppTrait for App {
                 }
                 Command::MoveToDown => {
                     let index = bin_data_index.move_to_down();
+                    window.move_to_down(
+                        bin_data_index.get_current_line(),
+                        layout.main_content.clone(),
+                        bin_data_index.get_max_line(),
+                    );
                     match write_mode {
                         WriteMode::OverWrite => {
                             if let Ok(value) = bin_data.get_data(index) {

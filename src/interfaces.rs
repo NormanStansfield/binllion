@@ -11,10 +11,12 @@ pub(crate) trait NoticeProviderTrait {
     fn get_notice(&mut self) -> Notice;
 }
 
+use std::ops::Range;
+
 use nutype::nutype;
 use ratatui::prelude::Position;
 
-use crate::{mini_buf, write_mode::WriteMode};
+use crate::write_mode::WriteMode;
 #[nutype(sanitize(trim), derive(Default), default = "")]
 pub(crate) struct Notice(String);
 
@@ -38,7 +40,7 @@ pub(crate) trait BinDataTrait {
     fn get_data(&self, index: Index) -> Result<HexData, ()>;
     fn get_file_name(&self) -> Notice;
     fn get_size(&mut self) -> Index;
-    fn get_slice(&mut self) -> Vec<u8>;
+    fn get_slice(&mut self, range: Range<usize>) -> Vec<u8>;
     fn set_path(&mut self, path: FilePath);
 }
 
@@ -47,10 +49,6 @@ pub(crate) struct HexData(u8);
 
 #[nutype(derive(Clone, AsRef))]
 pub(crate) struct Index(usize);
-
-// pub(crate) struct BinData {
-//     buf: std::collections::VecDeque<u8>,
-// }
 
 pub(crate) trait KeyEventHandlerTrait {
     // fn new() -> Self;
@@ -98,18 +96,29 @@ pub(crate) trait BinDataIndexTrait {
     fn move_to_left(&mut self) -> Index;
     fn move_to_up(&mut self) -> Index;
     fn move_to_down(&mut self) -> Index;
-    // fn reset_index(&mut self);
     fn set_size(&mut self, value: Index);
-    fn get_position(&self) -> CursorPosition;
+    fn get_position(&self) -> ViewPosition;
+    fn get_max_line(&self) -> usize;
+    fn get_current_line(&self) -> usize;
 }
 
-pub(crate) trait CursorPositionTrait {
+pub(crate) trait WindowTrait {
     fn with_mini_buf_position(
-        position: CursorPosition,
+        position: ViewPosition,
         mini_buf_position: MiniBufPosition,
-    ) -> CursorPosition;
+    ) -> ViewPosition;
+    fn get_range(&self, area: TuiArea) -> Range<usize>;
+    fn new() -> Self;
+    fn move_to_up(&mut self, current_line: usize);
+    fn move_to_down(&mut self, current_line: usize, area: TuiArea, max_line: usize);
+    fn get_view_position(
+        &self,
+        current_line: usize,
+        area: TuiArea,
+        position: ViewPosition,
+    ) -> ViewPosition;
 }
-pub(crate) struct CursorPosition(pub(crate) Position);
+pub(crate) struct ViewPosition(pub(crate) Position);
 
 pub(crate) trait WriteModeTrait {
     fn toggle_mode(&self) -> WriteMode;
@@ -131,13 +140,6 @@ pub(crate) struct TuiLayout {
 
 #[nutype(derive(Clone, AsRef))]
 pub(crate) struct TuiArea(ratatui::prelude::Rect);
-
-pub(crate) trait TuiPanelCommonTrait {
-    fn new() -> Self;
-    // fn set_layout(&mut self, layout: TuiLayout);
-    // fn set_layout(&mut self, layout: TuiArea);
-    // fn draw(&mut self, terminal: &mut ratatui::DefaultTerminal);
-}
 
 pub(crate) trait TuiMainPanelTrait {
     fn set_title(&mut self, title: Notice);
