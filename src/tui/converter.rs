@@ -3,20 +3,23 @@
 // crosstermクレート
 use ratatui::text::Line;
 
+use crate::constants;
+
 // コンバーター
 pub(super) struct Converter;
 
 impl Converter {
     // ratatuiのLines向けに変換
-    pub(crate) fn convert_to_lines<F: ConverterTrait>(buf: &[u8], len: usize) -> Vec<Line> {
+    pub(crate) fn convert_to_lines<F: ConverterTrait>(buf: &[u8], address: usize) -> Vec<Line> {
         let mut vec = Vec::new();
-        buf.chunks(len).for_each(|x| {
+        let mut address = address;
+        buf.chunks(constants::LINE_LEN).for_each(|x| {
             vec.push(Line::from(format!(
-                "{:width$} {}",
-                " ",
-                F::convert(x),
-                width = 8
-            )))
+                "{address:#08X} {value}",
+                address = address,
+                value = F::convert(x),
+            )));
+            address += constants::LINE_LEN;
         });
         // dbg!(&vec);
         vec

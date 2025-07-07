@@ -139,7 +139,7 @@ pub(crate) trait TuiMainPanelTrait {
 }
 
 pub(crate) trait TuiMainContentTrait {
-    fn set_content(&mut self, bin_data: Vec<u8>);
+    fn set_content(&mut self, bin_data: Vec<u8>, address: usize);
     fn with_mini_buf_position(
         position: ViewPosition,
         mini_buf_position: MiniBufPosition,

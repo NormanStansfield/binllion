@@ -124,7 +124,8 @@ impl AppTrait for App {
 
             // メインパネル - コンテンツ
             let mut tui_main_content = TuiMainContent::new();
-            tui_main_content.set_content(bin_data.get_slice(range));
+            let address = range.start;
+            tui_main_content.set_content(bin_data.get_slice(range), address);
 
             // 描画
             let _ = self.terminal.draw(|frame| {

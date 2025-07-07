@@ -95,19 +95,22 @@ impl Widget for TuiHexHeaderLabel {
 
 pub(crate) struct TuiMainContent {
     content: Vec<u8>,
+    address: usize,
 }
 
 impl TuiMainContent {
     pub(crate) fn new() -> Self {
         Self {
             content: Vec::new(),
+            address: 0,
         }
     }
 }
 
 impl TuiMainContentTrait for TuiMainContent {
-    fn set_content(&mut self, bin_data: Vec<u8>) {
+    fn set_content(&mut self, bin_data: Vec<u8>, address: usize) {
         self.content = bin_data;
+        self.address = address;
     }
 
     fn with_mini_buf_position(
@@ -149,7 +152,7 @@ impl Widget for TuiMainContent {
         let mut main_panel_data: Vec<Line<'_>> = Vec::new();
         main_panel_data.append(&mut Converter::convert_to_lines::<ForHex>(
             &self.content,
-            constants::LINE_LEN,
+            self.address,
         ));
         Paragraph::new(Text::from(main_panel_data)).render(area, buf);
     }
