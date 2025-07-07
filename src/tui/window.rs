@@ -10,20 +10,6 @@ pub(crate) struct Window {
 }
 
 impl WindowTrait for Window {
-    fn with_mini_buf_position(
-        position: ViewPosition,
-        mini_buf_position: crate::interfaces::MiniBufPosition,
-    ) -> ViewPosition {
-        let position = if mini_buf_position == MiniBufPosition::Tail {
-            let ViewPosition(Position { x, y }) = position;
-
-            ViewPosition(Position::new(x - 1, y))
-        } else {
-            position
-        };
-        position
-    }
-
     fn get_range(&self, area: TuiArea) -> Range<usize> {
         let area = area.into_inner();
 
@@ -56,19 +42,10 @@ impl WindowTrait for Window {
             self.window_y = max_line;
         }
     }
+}
 
-    fn get_view_position(
-        &self,
-        current_line: usize,
-        area: TuiArea,
-        position: ViewPosition,
-    ) -> ViewPosition {
-        let area = area.into_inner();
-        let ViewPosition(position) = position;
-
-        let x = area.x + constants::ADDRESS_WIDTH as u16 + 2 + position.x * constants::STEP as u16;
-        let y = area.y + (current_line.saturating_sub(self.window_y)) as u16;
-
-        ViewPosition(Position::new(x, y))
+impl Window {
+    pub(crate) fn get_window_y(&self) -> usize {
+        self.window_y
     }
 }

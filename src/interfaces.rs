@@ -103,20 +103,10 @@ pub(crate) trait BinDataIndexTrait {
 }
 
 pub(crate) trait WindowTrait {
-    fn with_mini_buf_position(
-        position: ViewPosition,
-        mini_buf_position: MiniBufPosition,
-    ) -> ViewPosition;
     fn get_range(&self, area: TuiArea) -> Range<usize>;
     fn new() -> Self;
     fn move_to_up(&mut self, current_line: usize);
     fn move_to_down(&mut self, current_line: usize, area: TuiArea, max_line: usize);
-    fn get_view_position(
-        &self,
-        current_line: usize,
-        area: TuiArea,
-        position: ViewPosition,
-    ) -> ViewPosition;
 }
 pub(crate) struct ViewPosition(pub(crate) Position);
 
@@ -150,6 +140,16 @@ pub(crate) trait TuiMainPanelTrait {
 
 pub(crate) trait TuiMainContentTrait {
     fn set_content(&mut self, bin_data: Vec<u8>);
+    fn with_mini_buf_position(
+        position: ViewPosition,
+        mini_buf_position: MiniBufPosition,
+    ) -> ViewPosition;
+    fn get_view_position(
+        current_line: usize,
+        area: TuiArea,
+        position: ViewPosition,
+        window_y: usize,
+    ) -> ViewPosition;
 }
 
 // pub(crate) struct ErrorMessage(String);

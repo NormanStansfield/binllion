@@ -136,11 +136,12 @@ impl AppTrait for App {
             });
 
             // カーソル表示
-            let position = Window::with_mini_buf_position(
-                window.get_view_position(
+            let position = TuiMainContent::with_mini_buf_position(
+                TuiMainContent::get_view_position(
                     bin_data_index.get_current_line(),
                     layout.main_content.clone(),
                     bin_data_index.get_position(),
+                    window.get_window_y(),
                 ),
                 mini_buf.get_position(),
             );

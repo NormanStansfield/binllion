@@ -1,4 +1,4 @@
-use ratatui::layout::Rect;
+use ratatui::layout::{Position, Rect};
 use ratatui::prelude::Stylize;
 use ratatui::text::Text;
 use ratatui::widgets::{Clear, Paragraph, Widget};
@@ -9,7 +9,9 @@ use ratatui::{
 };
 
 use crate::constants;
-use crate::interfaces::{Notice, TuiMainContentTrait, TuiMainPanelTrait};
+use crate::interfaces::{
+    MiniBufPosition, Notice, TuiArea, TuiMainContentTrait, TuiMainPanelTrait, ViewPosition,
+};
 use crate::tui::converter::{Converter, ForHex};
 use crate::write_mode::WriteMode;
 
@@ -106,6 +108,35 @@ impl TuiMainContent {
 impl TuiMainContentTrait for TuiMainContent {
     fn set_content(&mut self, bin_data: Vec<u8>) {
         self.content = bin_data;
+    }
+
+    fn with_mini_buf_position(
+        position: ViewPosition,
+        mini_buf_position: crate::interfaces::MiniBufPosition,
+    ) -> ViewPosition {
+        let position = if mini_buf_position == MiniBufPosition::Tail {
+            let ViewPosition(Position { x, y }) = position;
+
+            ViewPosition(Position::new(x - 1, y))
+        } else {
+            position
+        };
+        position
+    }
+
+    fn get_view_position(
+        current_line: usize,
+        area: TuiArea,
+        position: ViewPosition,
+        window_y: usize,
+    ) -> ViewPosition {
+        let area = area.into_inner();
+        let ViewPosition(position) = position;
+
+        let x = area.x + constants::ADDRESS_WIDTH as u16 + 2 + position.x * constants::STEP as u16;
+        let y = area.y + (current_line.saturating_sub(window_y)) as u16;
+
+        ViewPosition(Position::new(x, y))
     }
 }
 
