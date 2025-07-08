@@ -6,7 +6,7 @@ use crate::interfaces::{
 };
 use crate::key_event_handler::KeyEventHandler;
 use crate::mini_buf::{self, MiniBuf};
-use crate::tui::Window;
+use crate::tui::{TuiAsciiPanel, Window};
 use crate::tui::{self, TuiHexHeaderLabel, TuiMainContent, TuiMainPanel};
 use crate::write_mode::{self, WriteMode};
 use crate::{
@@ -127,13 +127,18 @@ impl AppTrait for App {
             let address = range.start;
             tui_main_content.set_content(bin_data.get_slice(range), address);
 
+            // ASCIIパネル
+            let tui_ascii_panel = TuiAsciiPanel::new();
+
             // 描画
             let _ = self.terminal.draw(|frame| {
                 // メインパネルを描画
                 frame.render_widget(tui_main_panel, layout.main_panel.into_inner());
                 frame.render_widget(TuiHexHeaderLabel, layout.main_header.into_inner());
-
                 frame.render_widget(tui_main_content, layout.main_content.clone().into_inner());
+
+                // ASCIIパネルを描画
+                frame.render_widget(tui_ascii_panel, layout.ascii_panel.into_inner());
             });
 
             // カーソル表示

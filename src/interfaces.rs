@@ -154,8 +154,9 @@ pub(crate) trait TuiMainContentTrait {
 
 // pub(crate) struct ErrorMessage(String);
 
-pub(crate) trait TuiAsciiPanelTrait {
-    fn set_content(bin_data: &[u8]);
+pub(crate) trait TuiAsciiContentTrait {
+    fn set_content(&mut self, bin_data: Vec<u8>, address: usize);
+    // fn set_content(bin_data: Vec<u8>);
 }
 
 pub(crate) trait TuiVersatilePanelTrait {}
