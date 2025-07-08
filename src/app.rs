@@ -6,8 +6,8 @@ use crate::interfaces::{
 };
 use crate::key_event_handler::KeyEventHandler;
 use crate::mini_buf::{self, MiniBuf};
-use crate::tui::{TuiAsciiPanel, Window};
 use crate::tui::{self, TuiHexHeaderLabel, TuiMainContent, TuiMainPanel};
+use crate::tui::{TuiAsciiHeaderLabel, TuiAsciiPanel, Window};
 use crate::write_mode::{self, WriteMode};
 use crate::{
     bin_data::{self, BinData},
@@ -139,6 +139,7 @@ impl AppTrait for App {
 
                 // ASCIIパネルを描画
                 frame.render_widget(tui_ascii_panel, layout.ascii_panel.into_inner());
+                frame.render_widget(TuiAsciiHeaderLabel, layout.ascii_header.into_inner());
             });
 
             // カーソル表示
