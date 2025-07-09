@@ -14,11 +14,11 @@ use crate::{
 
 pub(crate) struct TuiAsciiPanel;
 
-impl TuiAsciiPanel {
-    pub(crate) fn new() -> Self {
-        Self
-    }
-}
+// impl TuiAsciiPanel {
+//     pub(crate) fn new() -> Self {
+//         Self
+//     }
+// }
 
 impl Widget for TuiAsciiPanel {
     fn render(self, area: ratatui::prelude::Rect, buf: &mut ratatui::prelude::Buffer)

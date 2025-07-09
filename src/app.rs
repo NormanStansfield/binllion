@@ -130,7 +130,7 @@ impl AppTrait for App {
             tui_main_content.set_content(bin_data.get_slice(range.clone()), address);
 
             // ASCIIパネル
-            let tui_ascii_panel = TuiAsciiPanel::new();
+            // let tui_ascii_panel = TuiAsciiPanel::new();
             let mut tui_ascii_content = TuiAsciiContent::new();
             tui_ascii_content.set_content(bin_data.get_slice(range), address);
 
@@ -145,7 +145,8 @@ impl AppTrait for App {
                 frame.render_widget(tui_main_content, layout.main_content.clone().into_inner());
 
                 // ASCIIパネルを描画
-                frame.render_widget(tui_ascii_panel, layout.ascii_panel.into_inner());
+                // frame.render_widget(tui_ascii_panel, layout.ascii_panel.into_inner());
+                frame.render_widget(TuiAsciiPanel, layout.ascii_panel.into_inner());
                 frame.render_widget(TuiAsciiHeaderLabel, layout.ascii_header.into_inner());
                 frame.render_widget(tui_ascii_content, layout.ascii_content.clone().into_inner());
 
