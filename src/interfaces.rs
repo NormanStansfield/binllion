@@ -157,4 +157,4 @@ pub(crate) trait TuiAsciiContentTrait {
     fn set_content(&mut self, bin_data: Vec<u8>, address: usize);
 }
 
-pub(crate) trait TuiVersatilePanelTrait {}
+// pub(crate) trait TuiVersatilePanelTrait {}
