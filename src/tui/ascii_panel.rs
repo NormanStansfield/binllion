@@ -2,11 +2,15 @@ use ratatui::{
     layout::Rect,
     style::Stylize,
     symbols::border,
-    text::Line,
-    widgets::{Block, Borders, Clear, Widget},
+    text::{Line, Text},
+    widgets::{Block, Borders, Clear, Paragraph, Widget},
 };
 
-use crate::{constants, interfaces::TuiAsciiContentTrait};
+use crate::{
+    constants,
+    interfaces::TuiAsciiContentTrait,
+    tui::converter::{Converter, ForAscii},
+};
 
 pub(crate) struct TuiAsciiPanel;
 
@@ -54,9 +58,33 @@ pub(crate) struct TuiAsciiContent {
     address: usize,
 }
 
+impl TuiAsciiContent {
+    pub(crate) fn new() -> Self {
+        Self {
+            content: Vec::<u8>::new(),
+            address: 0,
+        }
+    }
+}
+
 impl TuiAsciiContentTrait for TuiAsciiContent {
     fn set_content(&mut self, bin_data: Vec<u8>, address: usize) {
         self.content = bin_data;
         self.address = address;
+    }
+}
+
+impl Widget for TuiAsciiContent {
+    fn render(self, area: Rect, buf: &mut ratatui::prelude::Buffer)
+    where
+        Self: Sized,
+    {
+        // Asciiデコーデッドデータ
+        let mut ascii_content = Vec::new();
+        ascii_content.append(&mut Converter::convert_to_lines::<ForAscii>(
+            &self.content,
+            self.address,
+        ));
+        Paragraph::new(Text::from(ascii_content)).render(area, buf);
     }
 }

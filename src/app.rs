@@ -1,12 +1,12 @@
 use crate::bin_data_index::BinDataIndex;
 use crate::interfaces::{
     BinDataIndexTrait, Command, HexData, KeyEventHandlerTrait, MiniBufPosition, MiniBufTrait,
-    TuiArea, TuiLayoutProviderTrait, TuiMainContentTrait, ViewPosition, WindowTrait,
-    WriteModeTrait,
+    TuiArea, TuiAsciiContentTrait as _, TuiLayoutProviderTrait, TuiMainContentTrait, ViewPosition,
+    WindowTrait, WriteModeTrait,
 };
 use crate::key_event_handler::KeyEventHandler;
 use crate::mini_buf::{self, MiniBuf};
-use crate::tui::{self, TuiHexHeaderLabel, TuiMainContent, TuiMainPanel};
+use crate::tui::{self, TuiAsciiContent, TuiHexHeaderLabel, TuiMainContent, TuiMainPanel};
 use crate::tui::{TuiAsciiHeaderLabel, TuiAsciiPanel, Window};
 use crate::write_mode::{self, WriteMode};
 use crate::{
@@ -125,10 +125,12 @@ impl AppTrait for App {
             // メインパネル - コンテンツ
             let mut tui_main_content = TuiMainContent::new();
             let address = range.start;
-            tui_main_content.set_content(bin_data.get_slice(range), address);
+            tui_main_content.set_content(bin_data.get_slice(range.clone()), address);
 
             // ASCIIパネル
             let tui_ascii_panel = TuiAsciiPanel::new();
+            let mut tui_ascii_content = TuiAsciiContent::new();
+            tui_ascii_content.set_content(bin_data.get_slice(range), address);
 
             // 描画
             let _ = self.terminal.draw(|frame| {
@@ -140,6 +142,7 @@ impl AppTrait for App {
                 // ASCIIパネルを描画
                 frame.render_widget(tui_ascii_panel, layout.ascii_panel.into_inner());
                 frame.render_widget(TuiAsciiHeaderLabel, layout.ascii_header.into_inner());
+                frame.render_widget(tui_ascii_content, layout.ascii_content.clone().into_inner());
             });
 
             // カーソル表示
