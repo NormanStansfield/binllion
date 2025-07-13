@@ -1,4 +1,4 @@
-use crate::interfaces::{CharCode, HexData, Index, MiniBufPosition, MiniBufTrait};
+use crate::interfaces::{CharCode, HexData, MiniBufPosition, MiniBufTrait};
 
 #[derive(Debug)]
 pub(crate) struct MiniBuf {
@@ -48,5 +48,80 @@ impl MiniBufTrait for MiniBuf {
             1 => MiniBufPosition::Tail,
             _ => unreachable!(),
         }
+    }
+}
+
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_mini_buf() {
+        let mut mini_buf = MiniBuf::new();
+
+        // 初期状態のテスト
+        let res = mini_buf.get_position();
+        assert_eq!(res, MiniBufPosition::Head);
+
+        let res = mini_buf.to_hex();
+        match res {
+            Ok(val) => {
+                assert_eq!(val.into_inner(), 0u8)
+            }
+            Err(val) => {
+                panic!("{}", val);
+                }
+        }
+
+        // 9を追加
+        let char_code = '9';
+        mini_buf.add(CharCode::new(char_code));
+        let res = mini_buf.to_hex();
+        match res {
+            Ok(val) => {
+                assert_eq!(val.into_inner(), 0x90u8)
+            }
+            Err(val) => {
+                panic!("{}", val);
+                }
+        }
+
+        let res = mini_buf.get_position();
+        assert_eq!(res, MiniBufPosition::Tail);
+
+        // Fを追加
+        let char_code = 'F';
+        mini_buf.add(CharCode::new(char_code));
+        let res = mini_buf.to_hex();
+        match res {
+            Ok(val) => {
+                assert_eq!(val.into_inner(), 0x9Fu8)
+            }
+            Err(val) => {
+                panic!("{}", val);
+                }
+        }
+
+        let res = mini_buf.get_position();
+        assert_eq!(res, MiniBufPosition::Head);
+
+        // 45で上書き
+        let val = 45;
+        mini_buf.updata(HexData::new(val));
+        let res = mini_buf.to_hex();
+        match res {
+            Ok(val) => {
+                assert_eq!(val.into_inner(), 45u8)
+            }
+            Err(val) => {
+                panic!("{}", val);
+                }
+        }
+
+        let res = mini_buf.get_position();
+        assert_eq!(res, MiniBufPosition::Head);
+
+
     }
 }

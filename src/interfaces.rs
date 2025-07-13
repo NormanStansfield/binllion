@@ -79,7 +79,7 @@ pub(crate) trait MiniBufTrait {
     fn get_position(&self) -> MiniBufPosition;
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Debug)]
 pub(crate) enum MiniBufPosition {
     Head,
     Tail,
