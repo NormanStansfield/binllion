@@ -58,11 +58,15 @@ mod test {
     #[test]
     fn test_notice_provider() {
         let mut notice_provider = NoticeProvider::new();
-        let notice = "TestMessage".to_string();
-        notice_provider.add(Notice::new(notice.clone()));
+        let test_data_notice = "TestMessage".to_string();
+        notice_provider.add(Notice::new(test_data_notice.clone()));
         (0..=LIMIT).for_each(|_| {
             let res = notice_provider.get_notice();
-            assert_eq!(res.into_inner(), notice);
+            assert_eq!(res.into_inner(), test_data_notice);
         });
+        let res = notice_provider.get_notice();
+        assert_eq!(res.into_inner(), String::from(""));
+        let res = notice_provider.get_notice();
+        assert_eq!(res.into_inner(), String::from(""));
     }
 }
