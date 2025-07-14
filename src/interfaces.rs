@@ -13,6 +13,7 @@ pub(crate) trait NoticeProviderTrait {
 
 use std::ops::Range;
 
+use crossterm;
 use nutype::nutype;
 use ratatui::prelude::Position;
 
@@ -52,10 +53,10 @@ pub(crate) struct Index(usize);
 
 pub(crate) trait KeyEventHandlerTrait {
     // fn new() -> Self;
-    fn handle_key_event() -> Command;
+    fn handle_key_event(event: Result<crossterm::event::Event, std::io::Error>) -> Command;
 }
 
-#[derive(Debug)]
+#[derive(PartialEq, Debug)]
 pub(crate) enum Command {
     MoveToUp,
     MoveToDown,
@@ -86,7 +87,7 @@ pub(crate) enum MiniBufPosition {
 }
 
 // #[nutype()]
-#[nutype(sanitize(with = |char| char.to_ascii_lowercase()), derive(AsRef, Debug))]
+#[nutype(sanitize(with = |char| char.to_ascii_lowercase()), derive(AsRef, Debug, PartialEq))]
 pub(crate) struct CharCode(char);
 
 pub(crate) trait BinDataIndexTrait {

@@ -169,7 +169,7 @@ impl AppTrait for App {
             let _ = self.terminal.set_cursor_position(position);
             let _ = self.terminal.show_cursor();
 
-            let res = KeyEventHandler::handle_key_event();
+            let res = KeyEventHandler::handle_key_event(crossterm::event::read());
             // dbg!(&res);
 
             match res {

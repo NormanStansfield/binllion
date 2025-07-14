@@ -51,7 +51,6 @@ impl MiniBufTrait for MiniBuf {
     }
 }
 
-
 #[cfg(test)]
 mod test {
     use super::*;
@@ -71,7 +70,7 @@ mod test {
             }
             Err(val) => {
                 panic!("{}", val);
-                }
+            }
         }
 
         // 9を追加
@@ -84,7 +83,7 @@ mod test {
             }
             Err(val) => {
                 panic!("{}", val);
-                }
+            }
         }
 
         let res = mini_buf.get_position();
@@ -100,7 +99,7 @@ mod test {
             }
             Err(val) => {
                 panic!("{}", val);
-                }
+            }
         }
 
         let res = mini_buf.get_position();
@@ -116,12 +115,10 @@ mod test {
             }
             Err(val) => {
                 panic!("{}", val);
-                }
+            }
         }
 
         let res = mini_buf.get_position();
         assert_eq!(res, MiniBufPosition::Head);
-
-
     }
 }
