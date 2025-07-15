@@ -179,5 +179,10 @@ mod test {
         let key_event = KeyEvent::new(KeyCode::Char('5'), KeyModifiers::NONE);
         let res = KeyEventHandler::handle_key_event(Ok(Event::Key(key_event)));
         assert_eq!(res, Command::InputData(CharCode::new('5')));
+
+        // Nullを入力
+        let key_event = KeyEvent::new(KeyCode::Null, KeyModifiers::NONE);
+        let res = KeyEventHandler::handle_key_event(Ok(Event::Key(key_event)));
+        assert_eq!(res, Command::Nop);
     }
 }

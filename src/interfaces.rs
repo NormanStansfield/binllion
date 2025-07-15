@@ -56,7 +56,8 @@ pub(crate) trait KeyEventHandlerTrait {
     fn handle_key_event(event: Result<crossterm::event::Event, std::io::Error>) -> Command;
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(Debug)]
+#[cfg_attr(test, derive(PartialEq))]
 pub(crate) enum Command {
     MoveToUp,
     MoveToDown,
@@ -80,14 +81,15 @@ pub(crate) trait MiniBufTrait {
     fn get_position(&self) -> MiniBufPosition;
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq)]
+#[cfg_attr(test, derive(Debug))]
 pub(crate) enum MiniBufPosition {
     Head,
     Tail,
 }
 
-// #[nutype()]
-#[nutype(sanitize(with = |char| char.to_ascii_lowercase()), derive(AsRef, Debug, PartialEq))]
+#[cfg_attr(not(test), nutype(sanitize(with = |char| char.to_ascii_lowercase()), derive(AsRef, Debug)))]
+#[cfg_attr(test, nutype(sanitize(with = |char| char.to_ascii_lowercase()), derive(AsRef, Debug, PartialEq)))]
 pub(crate) struct CharCode(char);
 
 pub(crate) trait BinDataIndexTrait {
