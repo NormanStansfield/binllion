@@ -14,3 +14,13 @@ ratatui = "0.28.1"
 [dev-dependencies]
 ascii = "1.1.0"
 encoding_rs = "0.8.34"
+
+
+[[example]]
+name = "convert_to_ascii"
+path = "examples/convert_to_ascii/main.rs"
+required-features = ["nightly"]
+
+[features]
+default = []
+nightly = []
