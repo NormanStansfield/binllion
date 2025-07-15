@@ -45,7 +45,7 @@ impl BinDataTrait for BinData {
 
         self.buf.make_contiguous();
         // if self.buf.len() >= 0 {
-            self.buf.remove(index);
+        self.buf.remove(index);
         // }
     }
 
@@ -143,7 +143,6 @@ impl BinDataTrait for BinData {
     }
 }
 
-
 #[cfg(test)]
 mod test {
     use super::*;
@@ -152,41 +151,46 @@ mod test {
     fn test_bin_data() {
         let mut bin_data = BinData::new();
 
-        assert!(bin_data.get_data(Index::new(0)).is_err() );
+        assert!(bin_data.get_data(Index::new(0)).is_err());
 
         bin_data.update_data(Index::new(0), HexData::new(99));
-        assert_eq!(bin_data.get_data(Index::new(0)), Err(()) );
+        assert_eq!(bin_data.get_data(Index::new(0)), Err(()));
 
         bin_data.insert_data(Index::new(0), HexData::new(99));
-        assert_eq!(bin_data.get_data(Index::new(0)), Ok(HexData::new(99)) );
+        assert_eq!(bin_data.get_data(Index::new(0)), Ok(HexData::new(99)));
 
         bin_data.update_data(Index::new(0), HexData::new(55));
-        assert_eq!(bin_data.get_data(Index::new(0)), Ok(HexData::new(55)) );
+        assert_eq!(bin_data.get_data(Index::new(0)), Ok(HexData::new(55)));
 
-        bin_data.add_data(HexData::new(64));  // Add '@'
-        assert_eq!(bin_data.get_data(Index::new(1)), Ok(HexData::new(64)) );
+        bin_data.add_data(HexData::new(64)); // Add '@'
+        assert_eq!(bin_data.get_data(Index::new(1)), Ok(HexData::new(64)));
 
         assert_eq!(bin_data.get_size(), Index::new(2));
 
-        assert_eq!(bin_data.get_slice(0..2), vec![55,64]);
+        assert_eq!(bin_data.get_slice(0..2), vec![55, 64]);
 
         bin_data.delete_data(Index::new(0));
-        assert_eq!(bin_data.get_data(Index::new(0)), Ok(HexData::new(64)) );
+        assert_eq!(bin_data.get_data(Index::new(0)), Ok(HexData::new(64)));
 
-        assert_eq!(bin_data.get_file_name(), Notice::new(String::from("no file")));
+        assert_eq!(
+            bin_data.get_file_name(),
+            Notice::new(String::from("no file"))
+        );
 
         assert!(bin_data.export_to().is_err());
 
         bin_data.set_path(FilePath::new(Some(OsString::from("./export_test"))));
-        assert_eq!(bin_data.get_file_name(), Notice::new(String::from("export_test")));
+        assert_eq!(
+            bin_data.get_file_name(),
+            Notice::new(String::from("export_test"))
+        );
 
         assert!(bin_data.export_to().is_ok());
 
         bin_data.delete_data(Index::new(0));
-        assert!(bin_data.get_data(Index::new(0)).is_err() );
+        assert!(bin_data.get_data(Index::new(0)).is_err());
 
         bin_data.import_from(FilePath::new(Some(OsString::from("./export_test"))));
-        assert_eq!(bin_data.get_data(Index::new(0)), Ok(HexData::new(64)) );
-
+        assert_eq!(bin_data.get_data(Index::new(0)), Ok(HexData::new(64)));
     }
 }

@@ -20,7 +20,10 @@ use ratatui::prelude::Position;
 use crate::write_mode::WriteMode;
 
 #[cfg_attr(not(test), nutype(sanitize(trim), derive(Default), default = ""))]
-#[cfg_attr(test, nutype(sanitize(trim), derive(Default, Debug, PartialEq), default = ""))]
+#[cfg_attr(
+    test,
+    nutype(sanitize(trim), derive(Default, Debug, PartialEq), default = "")
+)]
 pub(crate) struct Notice(String);
 
 #[nutype(derive(Clone))]
