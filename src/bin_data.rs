@@ -23,20 +23,15 @@ impl BinDataTrait for BinData {
 
     // データ追加
     fn add_data(&mut self, value: HexData) {
-        // let mut new_data: std::collections::VecDeque<u8> = std::collections::VecDeque::from(value);
-        // let mut new_data: std::collections::VecDeque<HexData> = value.into();
-        // let HexData(value) = value;
         let value = value.into_inner();
 
         self.buf.make_contiguous();
         self.buf.push_back(value);
-        // self.buf.append(&mut new_data);
     }
 
     // データ挿入
     fn insert_data(&mut self, index: Index, value: HexData) {
         let index = index.into_inner();
-        // let HexData(value) = value;
         let value = value.into_inner();
 
         self.buf.make_contiguous();
@@ -47,20 +42,16 @@ impl BinDataTrait for BinData {
     // データ削除
     fn delete_data(&mut self, index: Index) {
         let index = index.into_inner();
-        // let Index(index) = index;
 
         self.buf.make_contiguous();
-        if self.buf.len() > 1 {
+        // if self.buf.len() >= 0 {
             self.buf.remove(index);
-            // self.buf.make_contiguous();
-        }
+        // }
     }
 
     // データ上書き
     fn update_data(&mut self, index: Index, value: HexData) {
         let index = index.into_inner();
-        // let Index(index) = index;
-        // let HexData(value) = value;
         let value = value.into_inner();
 
         self.buf.make_contiguous();
@@ -68,12 +59,6 @@ impl BinDataTrait for BinData {
             *elem = value;
         }
     }
-
-    // 編集データを[u8]配列で返す
-    // pub(crate) fn buf(&self) -> &[u8] {
-    //     let (res, _) = self.buf.as_slices();
-    //     res
-    // }
 
     // ファイルから読み込み
     fn import_from(&mut self, path: FilePath) -> std::io::Result<()> {
@@ -158,11 +143,50 @@ impl BinDataTrait for BinData {
     }
 }
 
-// Vec<u8>から編集データへ変換
-// impl From<Vec<u8>> for BinData {
-//     fn from(buf: Vec<u8>) -> Self {
-//         BinData {
-//             buf: std::collections::VecDeque::from(buf),
-//         }
-//     }
-// }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_bin_data() {
+        let mut bin_data = BinData::new();
+
+        assert!(bin_data.get_data(Index::new(0)).is_err() );
+
+        bin_data.update_data(Index::new(0), HexData::new(99));
+        assert_eq!(bin_data.get_data(Index::new(0)), Err(()) );
+
+        bin_data.insert_data(Index::new(0), HexData::new(99));
+        assert_eq!(bin_data.get_data(Index::new(0)), Ok(HexData::new(99)) );
+
+        bin_data.update_data(Index::new(0), HexData::new(55));
+        assert_eq!(bin_data.get_data(Index::new(0)), Ok(HexData::new(55)) );
+
+        bin_data.add_data(HexData::new(64));  // Add '@'
+        assert_eq!(bin_data.get_data(Index::new(1)), Ok(HexData::new(64)) );
+
+        assert_eq!(bin_data.get_size(), Index::new(2));
+
+        assert_eq!(bin_data.get_slice(0..2), vec![55,64]);
+
+        bin_data.delete_data(Index::new(0));
+        assert_eq!(bin_data.get_data(Index::new(0)), Ok(HexData::new(64)) );
+
+        assert_eq!(bin_data.get_file_name(), Notice::new(String::from("no file")));
+
+        assert!(bin_data.export_to().is_err());
+
+        bin_data.set_path(FilePath::new(Some(OsString::from("./export_test"))));
+        assert_eq!(bin_data.get_file_name(), Notice::new(String::from("export_test")));
+
+        assert!(bin_data.export_to().is_ok());
+
+        bin_data.delete_data(Index::new(0));
+        assert!(bin_data.get_data(Index::new(0)).is_err() );
+
+        bin_data.import_from(FilePath::new(Some(OsString::from("./export_test"))));
+        assert_eq!(bin_data.get_data(Index::new(0)), Ok(HexData::new(64)) );
+
+    }
+}

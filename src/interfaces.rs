@@ -18,7 +18,9 @@ use nutype::nutype;
 use ratatui::prelude::Position;
 
 use crate::write_mode::WriteMode;
-#[nutype(sanitize(trim), derive(Default), default = "")]
+
+#[cfg_attr(not(test), nutype(sanitize(trim), derive(Default), default = ""))]
+#[cfg_attr(test, nutype(sanitize(trim), derive(Default, Debug, PartialEq), default = ""))]
 pub(crate) struct Notice(String);
 
 #[nutype(derive(Clone))]
@@ -45,10 +47,12 @@ pub(crate) trait BinDataTrait {
     fn set_path(&mut self, path: FilePath);
 }
 
-#[nutype(derive(Clone, AsRef))]
+#[cfg_attr(not(test), nutype(derive(Clone, AsRef)))]
+#[cfg_attr(test, nutype(derive(Clone, AsRef, PartialEq, Debug)))]
 pub(crate) struct HexData(u8);
 
-#[nutype(derive(Clone, AsRef))]
+#[cfg_attr(not(test), nutype(derive(Clone, AsRef)))]
+#[cfg_attr(test, nutype(derive(Clone, AsRef, PartialEq, Debug)))]
 pub(crate) struct Index(usize);
 
 pub(crate) trait KeyEventHandlerTrait {
