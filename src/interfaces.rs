@@ -118,6 +118,8 @@ pub(crate) trait WindowTrait {
     fn move_to_up(&mut self, current_line: usize);
     fn move_to_down(&mut self, current_line: usize, area: TuiArea, max_line: usize);
 }
+
+#[cfg_attr(test, derive(PartialEq, Debug))]
 pub(crate) struct ViewPosition(pub(crate) Position);
 
 pub(crate) trait WriteModeTrait {
