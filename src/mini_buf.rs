@@ -52,7 +52,7 @@ impl MiniBufTrait for MiniBuf {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::*;
 
     #[test]

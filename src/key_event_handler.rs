@@ -125,7 +125,7 @@ impl KeyEventHandlerTrait for KeyEventHandler {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::*;
 
     #[test]

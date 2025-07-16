@@ -29,7 +29,7 @@ impl fmt::Display for WriteMode {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::*;
 
     #[test]
