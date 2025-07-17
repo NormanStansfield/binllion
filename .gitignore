@@ -23,4 +23,3 @@ Cargo.lock
 
 # For cargo config
 /.cargo
-export_test
