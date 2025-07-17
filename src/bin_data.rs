@@ -146,6 +146,7 @@ impl BinDataTrait for BinData {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use tempfile::tempdir;
 
     #[test]
     fn test_bin_data() {
@@ -179,18 +180,30 @@ mod tests {
 
         assert!(bin_data.export_to().is_err());
 
-        bin_data.set_path(FilePath::new(Some(OsString::from("./export_test"))));
-        assert_eq!(
-            bin_data.get_file_name(),
-            Notice::new(String::from("export_test"))
-        );
+        let file_name = "test_bin_data.test";
+        let tmp_dir = tempdir();
 
-        assert!(bin_data.export_to().is_ok());
+        if let Ok(dir) = tmp_dir {
+            let file_path = dir.path().join(file_name);
+            // dbg!(&file_path);
+            let file_path = FilePath::new(Some(file_path.into_os_string()));
 
-        bin_data.delete_data(Index::new(0));
-        assert!(bin_data.get_data(Index::new(0)).is_err());
+            bin_data.set_path(file_path.clone());
+            assert_eq!(
+                bin_data.get_file_name(),
+                Notice::new(String::from(file_name))
+            );
 
-        bin_data.import_from(FilePath::new(Some(OsString::from("./export_test"))));
-        assert_eq!(bin_data.get_data(Index::new(0)), Ok(HexData::new(64)));
+            assert!(bin_data.export_to().is_ok());
+
+            bin_data.delete_data(Index::new(0));
+            assert!(bin_data.get_data(Index::new(0)).is_err());
+
+            let res = bin_data.import_from(file_path);
+            assert!(res.is_ok());
+            assert_eq!(bin_data.get_data(Index::new(0)), Ok(HexData::new(64)));
+        } else {
+            panic!("Temporary file creation error on test_bin_data()");
+        };
     }
 }
