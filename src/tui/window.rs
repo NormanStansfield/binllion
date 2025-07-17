@@ -1,9 +1,8 @@
 use std::ops::Range;
 
 use crate::constants;
-use crate::interfaces::{MiniBufPosition, TuiArea};
-use crate::interfaces::{ViewPosition, WindowTrait};
-use ratatui::layout::Position;
+use crate::interfaces::TuiArea;
+use crate::interfaces::WindowTrait;
 
 pub(crate) struct Window {
     window_y: usize,
@@ -34,12 +33,12 @@ impl WindowTrait for Window {
 
     fn move_to_down(&mut self, current_line: usize, area: TuiArea, max_line: usize) {
         let area = area.into_inner();
-        let diff = (area.height - area.y) as usize;
-        if current_line >= self.window_y + diff {
-            self.window_y = current_line - diff;
+        let window_y_height = (area.height - area.y) as usize;
+        if current_line > self.window_y + window_y_height {
+            self.window_y = current_line - window_y_height;
         }
-        if self.window_y > max_line {
-            self.window_y = max_line;
+        if self.window_y + window_y_height > max_line {
+            self.window_y = max_line - window_y_height;
         }
     }
 }
@@ -47,5 +46,123 @@ impl WindowTrait for Window {
 impl Window {
     pub(crate) fn get_window_y(&self) -> usize {
         self.window_y
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use ratatui::layout::Rect;
+
+    use super::*;
+
+    #[test]
+    fn test_window() {
+        let mut window = Window::new();
+        let current_line = 5;
+        let max_line = 40;
+        let area = TuiArea::new(Rect {
+            x: 10,
+            y: 10,
+            width: 30,
+            height: 30,
+        });
+
+        assert_eq!(window.get_window_y(), 0);
+
+        window.move_to_down(current_line, area.clone(), max_line);
+        assert_eq!(window.get_window_y(), 0);
+        assert_eq!(
+            window.get_range(area.clone()),
+            0 * constants::LINE_LEN..20 * constants::LINE_LEN + constants::LINE_LEN
+        );
+
+        let current_line = 20;
+        window.move_to_down(current_line, area.clone(), max_line);
+        assert_eq!(window.get_window_y(), 0);
+        assert_eq!(
+            window.get_range(area.clone()),
+            0 * constants::LINE_LEN..20 * constants::LINE_LEN + constants::LINE_LEN
+        );
+
+        let current_line = 21;
+        window.move_to_down(current_line, area.clone(), max_line);
+        assert_eq!(window.get_window_y(), 1);
+        assert_eq!(
+            window.get_range(area.clone()),
+            1 * constants::LINE_LEN..21 * constants::LINE_LEN + constants::LINE_LEN
+        );
+
+        let current_line = 22;
+        window.move_to_down(current_line, area.clone(), max_line);
+        assert_eq!(window.get_window_y(), 2);
+        assert_eq!(
+            window.get_range(area.clone()),
+            2 * constants::LINE_LEN..22 * constants::LINE_LEN + constants::LINE_LEN
+        );
+
+        let current_line = 35;
+        window.move_to_down(current_line, area.clone(), max_line);
+        assert_eq!(window.get_window_y(), 15);
+        assert_eq!(
+            window.get_range(area.clone()),
+            15 * constants::LINE_LEN..35 * constants::LINE_LEN + constants::LINE_LEN
+        );
+
+        let current_line = 40;
+        window.move_to_down(current_line, area.clone(), max_line);
+        assert_eq!(window.get_window_y(), 20);
+        assert_eq!(
+            window.get_range(area.clone()),
+            20 * constants::LINE_LEN..40 * constants::LINE_LEN + constants::LINE_LEN
+        );
+
+        let current_line = 41;
+        window.move_to_down(current_line, area.clone(), max_line);
+        assert_eq!(window.get_window_y(), 20);
+        assert_eq!(
+            window.get_range(area.clone()),
+            20 * constants::LINE_LEN..40 * constants::LINE_LEN + constants::LINE_LEN
+        );
+
+        let current_line = 39;
+        window.move_to_up(current_line);
+        assert_eq!(window.get_window_y(), 20);
+        assert_eq!(
+            window.get_range(area.clone()),
+            20 * constants::LINE_LEN..40 * constants::LINE_LEN + constants::LINE_LEN
+        );
+
+        let current_line = 20;
+        window.move_to_up(current_line);
+        assert_eq!(window.get_window_y(), 20);
+        assert_eq!(
+            window.get_range(area.clone()),
+            20 * constants::LINE_LEN..40 * constants::LINE_LEN + constants::LINE_LEN
+        );
+
+        let current_line = 19;
+        window.move_to_up(current_line);
+        assert_eq!(window.get_window_y(), 19);
+        assert_eq!(
+            window.get_range(area.clone()),
+            19 * constants::LINE_LEN..39 * constants::LINE_LEN + constants::LINE_LEN
+        );
+
+        let current_line = 10;
+        window.move_to_up(current_line);
+        assert_eq!(window.get_window_y(), 10);
+        assert_eq!(
+            window.get_range(area.clone()),
+            10 * constants::LINE_LEN..30 * constants::LINE_LEN + constants::LINE_LEN
+        );
+
+        let current_line = 0;
+        window.move_to_up(current_line);
+        assert_eq!(window.get_window_y(), 0);
+        assert_eq!(
+            window.get_range(area.clone()),
+            0 * constants::LINE_LEN..20 * constants::LINE_LEN + constants::LINE_LEN
+        );
     }
 }
