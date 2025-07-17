@@ -58,7 +58,6 @@ impl Widget for TuiMainPanel {
 impl TuiMainPanelTrait for TuiMainPanel {
     fn set_title(&mut self, title: Notice) {
         self.title = format!(" {} ", title.into_inner());
-        // self.title = title.into_inner();
     }
 
     fn set_err_msg(&mut self, message: Notice) {
@@ -155,5 +154,127 @@ impl Widget for TuiMainContent {
             self.address,
         ));
         Paragraph::new(Text::from(main_panel_data)).render(area, buf);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use insta::assert_snapshot;
+    use ratatui::{backend::TestBackend, Terminal};
+
+    #[test]
+    fn test_tui_hex_header_label() {
+        let widget = TuiHexHeaderLabel;
+
+        let mut terminal = Terminal::new(TestBackend::new(80, 20)).unwrap();
+        terminal
+            .draw(|frame| frame.render_widget(widget, frame.area()))
+            .unwrap();
+        assert_snapshot!(terminal.backend());
+    }
+
+    #[test]
+    fn test_tui_main_panel_001() {
+        let mut widget = TuiMainPanel::new();
+
+        let mut terminal = Terminal::new(TestBackend::new(80, 20)).unwrap();
+        terminal
+            .draw(|frame| frame.render_widget(widget, frame.area()))
+            .unwrap();
+        assert_snapshot!("001", terminal.backend());
+    }
+
+    #[test]
+    fn test_tui_main_panel_002() {
+        let mut widget = TuiMainPanel::new();
+        widget.set_title(Notice::new("test_title".to_string()));
+
+        let mut terminal = Terminal::new(TestBackend::new(80, 20)).unwrap();
+        terminal
+            .draw(|frame| frame.render_widget(widget, frame.area()))
+            .unwrap();
+        assert_snapshot!("002", terminal.backend());
+    }
+
+    #[test]
+    fn test_tui_main_panel_003() {
+        let mut widget = TuiMainPanel::new();
+        widget.set_mode(WriteMode::OverWrite);
+
+        let mut terminal = Terminal::new(TestBackend::new(80, 20)).unwrap();
+        terminal
+            .draw(|frame| frame.render_widget(widget, frame.area()))
+            .unwrap();
+        assert_snapshot!("003", terminal.backend());
+    }
+
+    #[test]
+    fn test_tui_main_panel_004() {
+        let mut widget = TuiMainPanel::new();
+        widget.set_err_msg(Notice::new("Test Message".to_string()));
+
+        let mut terminal = Terminal::new(TestBackend::new(80, 20)).unwrap();
+        terminal
+            .draw(|frame| frame.render_widget(widget, frame.area()))
+            .unwrap();
+        assert_snapshot!("004", terminal.backend());
+    }
+
+    #[test]
+    fn test_tui_main_content() {
+        let mut widget = TuiMainContent::new();
+
+        let mut bin_data = Vec::<u8>::new();
+        let _ = (0..139).fold(0, |_acc, val| {
+            bin_data.push(val);
+            val
+        });
+        widget.set_content(bin_data, 3 * constants::LINE_LEN);
+
+        let mut terminal = Terminal::new(TestBackend::new(80, 20)).unwrap();
+        terminal
+            .draw(|frame| frame.render_widget(widget, frame.area()))
+            .unwrap();
+        assert_snapshot!(terminal.backend());
+
+        let view_position = ViewPosition(Position { x: 10, y: 10 });
+        let mini_buf_position = MiniBufPosition::Head;
+
+        let res = TuiMainContent::with_mini_buf_position(view_position, mini_buf_position);
+        assert_eq!(res, ViewPosition(Position { x: 10, y: 10 }));
+
+        let view_position = ViewPosition(Position { x: 10, y: 10 });
+        let mini_buf_position = MiniBufPosition::Tail;
+
+        let res = TuiMainContent::with_mini_buf_position(view_position, mini_buf_position);
+        assert_eq!(res, ViewPosition(Position { x: 9, y: 10 }));
+
+        let current_line = 15;
+        let position = ViewPosition(Position { x: 10, y: 10 });
+        let area = TuiArea::new(Rect {
+            x: 5,
+            y: 5,
+            width: 55,
+            height: 55,
+        });
+        let window_y = 0;
+
+        let res = TuiMainContent::get_view_position(current_line, area.clone(), position, window_y);
+        assert_eq!(res, ViewPosition(Position { x: 45, y: 20 }));
+
+        let current_line = 15;
+        let position = ViewPosition(Position { x: 15, y: 15 });
+        let window_y = 0;
+
+        let res = TuiMainContent::get_view_position(current_line, area.clone(), position, window_y);
+        assert_eq!(res, ViewPosition(Position { x: 60, y: 20 }));
+
+        let current_line = 25;
+        let position = ViewPosition(Position { x: 15, y: 15 });
+        let window_y = 20;
+
+        let res = TuiMainContent::get_view_position(current_line, area.clone(), position, window_y);
+        assert_eq!(res, ViewPosition(Position { x: 60, y: 10 }));
     }
 }
