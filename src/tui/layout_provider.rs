@@ -45,7 +45,7 @@ impl TuiLayoutProviderTrait for TuiLayoutProvider {
             .split(sub_layout[0]);
 
         // レイアウトの保存
-        let tui_layout = TuiLayout {
+        TuiLayout {
             main_panel: TuiArea::new(main_layout[0]),
             main_header: TuiArea::new(inner_main[0]),
             main_content: TuiArea::new(inner_main[1]),
@@ -53,7 +53,6 @@ impl TuiLayoutProviderTrait for TuiLayoutProvider {
             ascii_header: TuiArea::new(inner_sub0[0]),
             ascii_content: TuiArea::new(inner_sub0[1]),
             versatile: TuiArea::new(sub_layout[1]),
-        };
-        tui_layout
+        }
     }
 }

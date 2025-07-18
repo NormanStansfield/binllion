@@ -22,12 +22,12 @@ impl BinDataTrait for BinData {
     }
 
     // データ追加
-    fn add_data(&mut self, value: HexData) {
-        let value = value.into_inner();
+    // fn add_data(&mut self, value: HexData) {
+    //     let value = value.into_inner();
 
-        self.buf.make_contiguous();
-        self.buf.push_back(value);
-    }
+    //     self.buf.make_contiguous();
+    //     self.buf.push_back(value);
+    // }
 
     // データ挿入
     fn insert_data(&mut self, index: Index, value: HexData) {
@@ -163,7 +163,9 @@ mod tests {
         bin_data.update_data(Index::new(0), HexData::new(55));
         assert_eq!(bin_data.get_data(Index::new(0)), Ok(HexData::new(55)));
 
-        bin_data.add_data(HexData::new(64)); // Add '@'
+        // bin_data.add_data(HexData::new(64)); // Add '@'
+        // assert_eq!(bin_data.get_data(Index::new(1)), Ok(HexData::new(64)));
+        bin_data.insert_data(Index::new(1), HexData::new(64));
         assert_eq!(bin_data.get_data(Index::new(1)), Ok(HexData::new(64)));
 
         assert_eq!(bin_data.get_size(), Index::new(2));

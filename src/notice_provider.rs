@@ -38,11 +38,12 @@ impl NoticeProviderTrait for NoticeProvider {
                     self.cache.clear();
                 }
             }
-            x if x >= constants::LIMIT => {
-                self.count = 0;
-            }
             x => {
-                self.count += 1;
+                if x >= constants::LIMIT {
+                    self.count = 0;
+                } else {
+                    self.count += 1;
+                }
             }
         }
 

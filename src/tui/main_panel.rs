@@ -116,14 +116,13 @@ impl TuiMainContentTrait for TuiMainContent {
         position: ViewPosition,
         mini_buf_position: crate::interfaces::MiniBufPosition,
     ) -> ViewPosition {
-        let position = if mini_buf_position == MiniBufPosition::Left {
+        if mini_buf_position == MiniBufPosition::Left {
             let ViewPosition(Position { x, y }) = position;
 
             ViewPosition(Position::new(x - 1, y))
         } else {
             position
-        };
-        position
+        }
     }
 
     fn get_view_position(

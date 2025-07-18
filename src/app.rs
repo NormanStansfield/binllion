@@ -1,18 +1,18 @@
 use crate::bin_data_index::BinDataIndex;
 use crate::interfaces::{
     BinDataIndexTrait, Command, HexData, KeyEventHandlerTrait, MiniBufPosition, MiniBufTrait,
-    TuiArea, TuiAsciiContentTrait as _, TuiLayoutProviderTrait, TuiMainContentTrait, ViewPosition,
+    TuiAsciiContentTrait as _, TuiLayoutProviderTrait, TuiMainContentTrait, ViewPosition,
     WindowTrait, WriteModeTrait,
 };
 use crate::key_event_handler::KeyEventHandler;
-use crate::mini_buf::{self, MiniBuf};
+use crate::mini_buf::MiniBuf;
 use crate::tui::{
-    self, TuiAsciiContent, TuiHexHeaderLabel, TuiMainContent, TuiMainPanel, TuiVersatilePanel,
+    TuiAsciiContent, TuiHexHeaderLabel, TuiMainContent, TuiMainPanel, TuiVersatilePanel,
 };
 use crate::tui::{TuiAsciiHeaderLabel, TuiAsciiPanel, Window};
-use crate::write_mode::{self, WriteMode};
+use crate::write_mode::WriteMode;
 use crate::{
-    bin_data::{self, BinData},
+    bin_data::BinData,
     interfaces::{
         AppTrait,
         BinDataTrait,
@@ -22,7 +22,7 @@ use crate::{
         TuiMainPanelTrait,
         // TuiPanelCommonTrait,
     },
-    notice_provider::{self, NoticeProvider},
+    notice_provider::NoticeProvider,
 };
 
 pub(crate) struct App {
@@ -238,7 +238,7 @@ impl AppTrait for App {
                         WriteMode::Insert => mini_buf.updata(HexData::new(0)),
                     }
                 }
-                Command::ImportFile => todo!(),
+                // Command::ImportFile => unimplemented!(),
                 Command::DeleteData => {
                     let index = bin_data_index.index();
                     bin_data.delete_data(index);
@@ -270,17 +270,12 @@ impl AppTrait for App {
                         }
                         WriteMode::Insert => unreachable!(),
                     }
-                    // dbg!(&mini_buf);
                 }
                 Command::Nop => {}
             }
-            // dbg!(&write_mode);
         }
 
         self.quit();
         ratatui::restore();
-        // dbg!(res);
-
-        // unimplemented!();
     }
 }

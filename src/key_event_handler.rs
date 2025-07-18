@@ -1,4 +1,4 @@
-use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+use crossterm::event::{Event, KeyCode, KeyEventKind, KeyModifiers};
 
 use crate::interfaces::{CharCode, Command, KeyEventHandlerTrait};
 
@@ -126,6 +126,8 @@ impl KeyEventHandlerTrait for KeyEventHandler {
 
 #[cfg(test)]
 mod tests {
+    use crossterm::event::KeyEvent;
+
     use super::*;
 
     #[test]

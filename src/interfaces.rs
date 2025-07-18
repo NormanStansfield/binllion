@@ -1,4 +1,4 @@
-pub(crate) trait AppTrait: Drop {
+pub(crate) trait AppTrait {
     fn run(&mut self);
     fn new() -> Self;
     fn is_running(&self) -> bool;
@@ -13,7 +13,6 @@ pub(crate) trait NoticeProviderTrait {
 
 use std::ops::Range;
 
-use crossterm;
 use nutype::nutype;
 use ratatui::prelude::Position;
 
@@ -30,14 +29,14 @@ pub(crate) struct Notice(String);
 pub(crate) struct FilePath(Option<std::ffi::OsString>);
 
 trait CurrentFileTrait {
-    fn new() -> Self;
+    // fn new() -> Self;
     fn get_path() -> FilePath;
     fn set_path(path: FilePath);
 }
 
 pub(crate) trait BinDataTrait {
     fn new() -> Self;
-    fn add_data(&mut self, value: HexData);
+    // fn add_data(&mut self, value: HexData);
     fn insert_data(&mut self, index: Index, value: HexData);
     fn delete_data(&mut self, index: Index);
     fn update_data(&mut self, index: Index, value: HexData);
@@ -71,7 +70,7 @@ pub(crate) enum Command {
     MoveToLeft,
     MoveToRight,
     ChangeWriteMode,
-    ImportFile,
+    // ImportFile,
     ExportFile,
     Exit,
     DeleteData,

@@ -51,15 +51,12 @@ impl BinDataIndexTrait for BinDataIndex {
 
     fn get_max_line(&self) -> usize {
         let offset = self.size.rem_euclid(constants::LINE_LEN);
-        let max_line = (self.size.saturating_sub(offset) / constants::LINE_LEN).saturating_sub(1);
-
-        max_line
+        (self.size.saturating_sub(offset) / constants::LINE_LEN).saturating_sub(1)
     }
 
     fn get_current_line(&self) -> usize {
         let offset = self.index.rem_euclid(constants::LINE_LEN);
-        let current_line = self.index.saturating_sub(offset) / constants::LINE_LEN;
-        current_line
+        self.index.saturating_sub(offset) / constants::LINE_LEN
     }
 
     fn get_position(&self) -> ViewPosition {
