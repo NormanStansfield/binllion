@@ -102,7 +102,7 @@ mod tests {
 
     #[test]
     fn test_tui_ascii_panel() {
-        let mut widget = TuiAsciiPanel;
+        let widget = TuiAsciiPanel;
 
         let mut terminal = Terminal::new(TestBackend::new(80, 20)).unwrap();
         terminal

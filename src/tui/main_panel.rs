@@ -175,7 +175,7 @@ mod tests {
 
     #[test]
     fn test_tui_main_panel_001() {
-        let mut widget = TuiMainPanel::new();
+        let widget = TuiMainPanel::new();
 
         let mut terminal = Terminal::new(TestBackend::new(80, 20)).unwrap();
         terminal
