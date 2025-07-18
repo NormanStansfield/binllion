@@ -69,3 +69,69 @@ impl ConverterTrait for ForAscii {
         })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use insta::assert_snapshot;
+    use ratatui::{backend::TestBackend, text::Text, Terminal};
+
+    #[test]
+    fn test_to_printable_char() {
+        let num = 0x0;
+        let res = Converter::to_printable_char(num);
+        assert_eq!(res, '.');
+
+        let num = 0x1F;
+        let res = Converter::to_printable_char(num);
+        assert_eq!(res, '.');
+
+        let num = 0x40;
+        let res = Converter::to_printable_char(num);
+        assert_eq!(res, '@');
+
+        let num = 0x7A;
+        let res = Converter::to_printable_char(num);
+        assert_eq!(res, 'z');
+
+        let num = 0x7F;
+        let res = Converter::to_printable_char(num);
+        assert_eq!(res, '.');
+
+        let num = 0xFF;
+        let res = Converter::to_printable_char(num);
+        assert_eq!(res, '.');
+    }
+
+    #[test]
+    fn test_convert_to_lines_for_hex() {
+        let mut bin_data = Vec::<u8>::new();
+        let _ = (0..139).fold(0, |_acc, val| {
+            bin_data.push(val);
+            val
+        });
+
+        let lines = Converter::convert_to_lines::<ForHex>(&bin_data, 3 * constants::LINE_LEN);
+        let mut terminal = Terminal::new(TestBackend::new(80, 20)).unwrap();
+        terminal
+            .draw(|frame| frame.render_widget(Text::from(lines), frame.area()))
+            .unwrap();
+        assert_snapshot!(terminal.backend());
+    }
+
+    #[test]
+    fn test_convert_to_lines_for_ascii() {
+        let mut bin_data = Vec::<u8>::new();
+        let _ = (0..139).fold(0, |_acc, val| {
+            bin_data.push(val);
+            val
+        });
+
+        let lines = Converter::convert_to_lines::<ForAscii>(&bin_data, 3 * constants::LINE_LEN);
+        let mut terminal = Terminal::new(TestBackend::new(80, 20)).unwrap();
+        terminal
+            .draw(|frame| frame.render_widget(Text::from(lines), frame.area()))
+            .unwrap();
+        assert_snapshot!(terminal.backend());
+    }
+}
