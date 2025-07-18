@@ -44,8 +44,8 @@ impl MiniBufTrait for MiniBuf {
 
     fn get_position(&self) -> MiniBufPosition {
         match &self.index {
-            0 => MiniBufPosition::Head,
-            1 => MiniBufPosition::Tail,
+            0 => MiniBufPosition::Right,
+            1 => MiniBufPosition::Left,
             _ => unreachable!(),
         }
     }
@@ -61,7 +61,7 @@ mod tests {
 
         // 初期状態のテスト
         let res = mini_buf.get_position();
-        assert_eq!(res, MiniBufPosition::Head);
+        assert_eq!(res, MiniBufPosition::Right);
 
         let res = mini_buf.to_hex();
         match res {
@@ -87,7 +87,7 @@ mod tests {
         }
 
         let res = mini_buf.get_position();
-        assert_eq!(res, MiniBufPosition::Tail);
+        assert_eq!(res, MiniBufPosition::Left);
 
         // Fを追加
         let char_code = 'F';
@@ -103,7 +103,7 @@ mod tests {
         }
 
         let res = mini_buf.get_position();
-        assert_eq!(res, MiniBufPosition::Head);
+        assert_eq!(res, MiniBufPosition::Right);
 
         // 45で上書き
         let val = 45;
@@ -119,6 +119,6 @@ mod tests {
         }
 
         let res = mini_buf.get_position();
-        assert_eq!(res, MiniBufPosition::Head);
+        assert_eq!(res, MiniBufPosition::Right);
     }
 }

@@ -253,7 +253,7 @@ impl AppTrait for App {
                                 bin_data.update_data(index, value);
                             }
                         }
-                        WriteMode::Insert if pos == MiniBufPosition::Head => {
+                        WriteMode::Insert if pos == MiniBufPosition::Right => {
                             let res = mini_buf.to_hex();
                             if let Ok(value) = res {
                                 let index = bin_data_index.index();
@@ -261,7 +261,7 @@ impl AppTrait for App {
                                 mini_buf.updata(HexData::new(0));
                             }
                         }
-                        WriteMode::Insert if pos == MiniBufPosition::Tail => {
+                        WriteMode::Insert if pos == MiniBufPosition::Left => {
                             let res = mini_buf.to_hex();
                             if let Ok(value) = res {
                                 let index = bin_data_index.index();

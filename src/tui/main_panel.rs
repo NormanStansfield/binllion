@@ -116,7 +116,7 @@ impl TuiMainContentTrait for TuiMainContent {
         position: ViewPosition,
         mini_buf_position: crate::interfaces::MiniBufPosition,
     ) -> ViewPosition {
-        let position = if mini_buf_position == MiniBufPosition::Tail {
+        let position = if mini_buf_position == MiniBufPosition::Left {
             let ViewPosition(Position { x, y }) = position;
 
             ViewPosition(Position::new(x - 1, y))
@@ -239,13 +239,13 @@ mod tests {
         assert_snapshot!(terminal.backend());
 
         let view_position = ViewPosition(Position { x: 10, y: 10 });
-        let mini_buf_position = MiniBufPosition::Head;
+        let mini_buf_position = MiniBufPosition::Right;
 
         let res = TuiMainContent::with_mini_buf_position(view_position, mini_buf_position);
         assert_eq!(res, ViewPosition(Position { x: 10, y: 10 }));
 
         let view_position = ViewPosition(Position { x: 10, y: 10 });
-        let mini_buf_position = MiniBufPosition::Tail;
+        let mini_buf_position = MiniBufPosition::Left;
 
         let res = TuiMainContent::with_mini_buf_position(view_position, mini_buf_position);
         assert_eq!(res, ViewPosition(Position { x: 9, y: 10 }));

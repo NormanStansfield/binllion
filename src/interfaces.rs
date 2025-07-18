@@ -91,8 +91,8 @@ pub(crate) trait MiniBufTrait {
 #[derive(PartialEq)]
 #[cfg_attr(test, derive(Debug))]
 pub(crate) enum MiniBufPosition {
-    Head,
-    Tail,
+    Right,
+    Left,
 }
 
 #[cfg_attr(not(test), nutype(sanitize(with = |char| char.to_ascii_lowercase()), derive(AsRef, Debug)))]
