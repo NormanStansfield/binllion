@@ -1,4 +1,4 @@
-use crate::interfaces::{BinDataTrait, FilePath, HexData, Index, Notice};
+use crate::interfaces::{BinDataTrait, CurrentFileTrait, FilePath, HexData, Index, Notice};
 
 use std::{
     collections::VecDeque,
@@ -134,12 +134,18 @@ impl BinDataTrait for BinData {
 
         res.to_vec()
     }
+}
 
+impl CurrentFileTrait for BinData {
     fn set_path(&mut self, path: FilePath) {
         let file_path = path.into_inner();
         if let Some(os_path) = file_path {
             self.path = os_path;
         }
+    }
+
+    fn get_path(&self) -> FilePath {
+        unimplemented!()
     }
 }
 

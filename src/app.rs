@@ -1,4 +1,5 @@
 use crate::bin_data_index::BinDataIndex;
+use crate::interfaces::CurrentFileTrait;
 use crate::interfaces::{
     BinDataIndexTrait, Command, HexData, KeyEventHandlerTrait, MiniBufPosition, MiniBufTrait,
     TuiAsciiContentTrait as _, TuiLayoutProviderTrait, TuiMainContentTrait, ViewPosition,

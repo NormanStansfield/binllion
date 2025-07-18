@@ -28,10 +28,11 @@ pub(crate) struct Notice(String);
 #[nutype(derive(Clone))]
 pub(crate) struct FilePath(Option<std::ffi::OsString>);
 
-trait CurrentFileTrait {
+pub(crate) trait CurrentFileTrait {
     // fn new() -> Self;
-    fn get_path() -> FilePath;
-    fn set_path(path: FilePath);
+    #[allow(dead_code)]
+    fn get_path(&self) -> FilePath;
+    fn set_path(&mut self, path: FilePath);
 }
 
 pub(crate) trait BinDataTrait {
@@ -46,7 +47,6 @@ pub(crate) trait BinDataTrait {
     fn get_file_name(&self) -> Notice;
     fn get_size(&mut self) -> Index;
     fn get_slice(&mut self, range: Range<usize>) -> Vec<u8>;
-    fn set_path(&mut self, path: FilePath);
 }
 
 #[cfg_attr(not(test), nutype(derive(Clone, AsRef)))]
