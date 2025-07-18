@@ -14,12 +14,6 @@ use crate::{
 
 pub(crate) struct TuiAsciiPanel;
 
-// impl TuiAsciiPanel {
-//     pub(crate) fn new() -> Self {
-//         Self
-//     }
-// }
-
 impl Widget for TuiAsciiPanel {
     fn render(self, area: ratatui::prelude::Rect, buf: &mut ratatui::prelude::Buffer)
     where
@@ -86,5 +80,53 @@ impl Widget for TuiAsciiContent {
             self.address,
         ));
         Paragraph::new(Text::from(ascii_content)).render(area, buf);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use insta::assert_snapshot;
+    use ratatui::{backend::TestBackend, Terminal};
+
+    #[test]
+    fn test_tui_ascii_header_label() {
+        let widget = TuiAsciiHeaderLabel;
+
+        let mut terminal = Terminal::new(TestBackend::new(80, 20)).unwrap();
+        terminal
+            .draw(|frame| frame.render_widget(widget, frame.area()))
+            .unwrap();
+        assert_snapshot!(terminal.backend());
+    }
+
+    #[test]
+    fn test_tui_ascii_panel() {
+        let mut widget = TuiAsciiPanel;
+
+        let mut terminal = Terminal::new(TestBackend::new(80, 20)).unwrap();
+        terminal
+            .draw(|frame| frame.render_widget(widget, frame.area()))
+            .unwrap();
+        assert_snapshot!(terminal.backend());
+    }
+
+    #[test]
+    fn test_tui_ascii_content() {
+        let mut widget = TuiAsciiContent::new();
+
+        let mut bin_data = Vec::<u8>::new();
+        let _ = (0..139).fold(0, |_acc, val| {
+            bin_data.push(val);
+            val
+        });
+
+        widget.set_content(bin_data, 3 * constants::LINE_LEN);
+
+        let mut terminal = Terminal::new(TestBackend::new(80, 20)).unwrap();
+        terminal
+            .draw(|frame| frame.render_widget(widget, frame.area()))
+            .unwrap();
+        assert_snapshot!("001", terminal.backend());
     }
 }
