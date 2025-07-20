@@ -7,7 +7,7 @@ use ratatui::{
 pub(crate) struct TuiVersatilePanel;
 
 impl Widget for TuiVersatilePanel {
-    fn render(self, area: ratatui::prelude::Rect, buf: &mut ratatui::prelude::Buffer)
+    fn render(self, area: ratatui::layout::Rect, buf: &mut ratatui::buffer::Buffer)
     where
         Self: Sized,
     {

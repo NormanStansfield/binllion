@@ -1,5 +1,4 @@
 use crate::interfaces::{BinDataTrait, CurrentFileTrait, FilePath, HexData, Index, Notice};
-
 use std::{
     collections::VecDeque,
     ffi::OsString,
@@ -44,9 +43,7 @@ impl BinDataTrait for BinData {
         let index = index.into_inner();
 
         self.buf.make_contiguous();
-        // if self.buf.len() >= 0 {
         self.buf.remove(index);
-        // }
     }
 
     // データ上書き

@@ -1,8 +1,7 @@
-use std::collections::VecDeque;
-
 use crate::constants;
 use crate::interfaces::Notice;
 use crate::interfaces::NoticeProviderTrait;
+use std::collections::VecDeque;
 
 // ステータス伝達
 pub(crate) struct NoticeProvider {

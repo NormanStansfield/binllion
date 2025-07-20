@@ -1,3 +1,8 @@
+use crate::write_mode::WriteMode;
+use nutype::nutype;
+use ratatui::layout::Position;
+use std::ops::Range;
+
 pub(crate) trait AppTrait {
     fn run(&mut self);
     fn new() -> Self;
@@ -11,25 +16,18 @@ pub(crate) trait NoticeProviderTrait {
     fn get_notice(&mut self) -> Notice;
 }
 
-use std::ops::Range;
-
-use nutype::nutype;
-use ratatui::prelude::Position;
-
-use crate::write_mode::WriteMode;
-
 #[cfg_attr(not(test), nutype(sanitize(trim), derive(Default), default = ""))]
 #[cfg_attr(
     test,
     nutype(sanitize(trim), derive(Default, Debug, PartialEq), default = "")
 )]
+
 pub(crate) struct Notice(String);
 
 #[nutype(derive(Clone))]
 pub(crate) struct FilePath(Option<std::ffi::OsString>);
 
 pub(crate) trait CurrentFileTrait {
-    // fn new() -> Self;
     #[allow(dead_code)]
     fn get_path(&self) -> FilePath;
     fn set_path(&mut self, path: FilePath);
@@ -58,7 +56,6 @@ pub(crate) struct HexData(u8);
 pub(crate) struct Index(usize);
 
 pub(crate) trait KeyEventHandlerTrait {
-    // fn new() -> Self;
     fn handle_key_event(event: Result<crossterm::event::Event, std::io::Error>) -> Command;
 }
 
@@ -80,7 +77,6 @@ pub(crate) enum Command {
 
 pub(crate) trait MiniBufTrait {
     fn new() -> Self;
-    // fn reset_buf(&mut self);
     fn add(&mut self, char_code: CharCode) -> MiniBufPosition;
     fn updata(&mut self, value: HexData);
     fn to_hex(&self) -> Result<HexData, std::num::ParseIntError>;
@@ -140,7 +136,7 @@ pub(crate) struct TuiLayout {
 }
 
 #[nutype(derive(Clone, AsRef))]
-pub(crate) struct TuiArea(ratatui::prelude::Rect);
+pub(crate) struct TuiArea(ratatui::layout::Rect);
 
 pub(crate) trait TuiMainPanelTrait {
     fn set_title(&mut self, title: Notice);
@@ -161,8 +157,6 @@ pub(crate) trait TuiMainContentTrait {
         window_y: usize,
     ) -> ViewPosition;
 }
-
-// pub(crate) struct ErrorMessage(String);
 
 pub(crate) trait TuiAsciiContentTrait {
     fn set_content(&mut self, bin_data: Vec<u8>, address: usize);

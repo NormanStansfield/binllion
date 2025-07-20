@@ -1,29 +1,34 @@
+use crate::interfaces::AppTrait;
+use crate::interfaces::BinDataIndexTrait as _;
+use crate::interfaces::BinDataTrait as _;
+use crate::interfaces::CurrentFileTrait as _;
+use crate::interfaces::KeyEventHandlerTrait as _;
+use crate::interfaces::MiniBufTrait as _;
+use crate::interfaces::NoticeProviderTrait as _;
+use crate::interfaces::TuiAsciiContentTrait as _;
+use crate::interfaces::TuiLayoutProviderTrait as _;
+use crate::interfaces::TuiMainContentTrait as _;
+use crate::interfaces::TuiMainPanelTrait as _;
+use crate::interfaces::WindowTrait as _;
+use crate::interfaces::WriteModeTrait as _;
+
+use crate::interfaces::Command;
+use crate::interfaces::HexData;
+use crate::interfaces::MiniBufPosition;
+use crate::interfaces::ViewPosition;
+
+use crate::bin_data::BinData;
 use crate::bin_data_index::BinDataIndex;
-use crate::interfaces::CurrentFileTrait;
-use crate::interfaces::{
-    BinDataIndexTrait, Command, HexData, KeyEventHandlerTrait, MiniBufPosition, MiniBufTrait,
-    TuiAsciiContentTrait as _, TuiLayoutProviderTrait, TuiMainContentTrait, ViewPosition,
-    WindowTrait, WriteModeTrait,
-};
+use crate::interfaces::FilePath;
+use crate::interfaces::Notice;
 use crate::key_event_handler::KeyEventHandler;
 use crate::mini_buf::MiniBuf;
-use crate::tui::{
-    TuiAsciiContent, TuiHexHeaderLabel, TuiMainContent, TuiMainPanel, TuiVersatilePanel,
-};
-use crate::tui::{TuiAsciiHeaderLabel, TuiAsciiPanel, Window};
+use crate::notice_provider::NoticeProvider;
 use crate::write_mode::WriteMode;
-use crate::{
-    bin_data::BinData,
-    interfaces::{
-        AppTrait,
-        BinDataTrait,
-        FilePath,
-        Notice,
-        NoticeProviderTrait,
-        TuiMainPanelTrait,
-        // TuiPanelCommonTrait,
-    },
-    notice_provider::NoticeProvider,
+
+use crate::tui::{
+    TuiAsciiContent, TuiAsciiHeaderLabel, TuiAsciiPanel, TuiHexHeaderLabel, TuiMainContent,
+    TuiMainPanel, TuiVersatilePanel, Window,
 };
 
 pub(crate) struct App {
@@ -31,7 +36,6 @@ pub(crate) struct App {
     terminal: ratatui::DefaultTerminal,
     // ループが継続中フラグ
     running: bool,
-    // file_path: Filefile_Path,
 }
 
 impl Drop for App {
@@ -47,7 +51,6 @@ use clap::Parser;
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
 struct Args {
-    /// file_Path to file
     file: Option<std::ffi::OsString>,
 }
 
@@ -74,7 +77,6 @@ impl AppTrait for App {
     fn run(&mut self) {
         // 引数からファイルの読み込み
         let args = Args::parse();
-        // let file_path: FilePath = if args.file.is_some() {
         let file_path: FilePath = if let Some(path) = args.file {
             FilePath::new(Some(path))
         } else {
@@ -131,7 +133,6 @@ impl AppTrait for App {
             tui_main_content.set_content(bin_data.get_slice(range.clone()), address);
 
             // ASCIIパネル
-            // let tui_ascii_panel = TuiAsciiPanel::new();
             let mut tui_ascii_content = TuiAsciiContent::new();
             tui_ascii_content.set_content(bin_data.get_slice(range), address);
 
@@ -146,7 +147,6 @@ impl AppTrait for App {
                 frame.render_widget(tui_main_content, layout.main_content.clone().into_inner());
 
                 // ASCIIパネルを描画
-                // frame.render_widget(tui_ascii_panel, layout.ascii_panel.into_inner());
                 frame.render_widget(TuiAsciiPanel, layout.ascii_panel.into_inner());
                 frame.render_widget(TuiAsciiHeaderLabel, layout.ascii_header.into_inner());
                 frame.render_widget(tui_ascii_content, layout.ascii_content.clone().into_inner());

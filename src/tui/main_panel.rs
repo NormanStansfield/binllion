@@ -1,19 +1,16 @@
-use ratatui::layout::{Position, Rect};
-use ratatui::prelude::Stylize;
-use ratatui::text::Text;
-use ratatui::widgets::{Clear, Paragraph, Widget};
-use ratatui::{
-    symbols::border,
-    text::Line,
-    widgets::{Block, Borders},
-};
-
 use crate::constants;
 use crate::interfaces::{
     MiniBufPosition, Notice, TuiArea, TuiMainContentTrait, TuiMainPanelTrait, ViewPosition,
 };
 use crate::tui::converter::{Converter, ForHex};
 use crate::write_mode::WriteMode;
+use ratatui::buffer::Buffer;
+use ratatui::layout::{Position, Rect};
+use ratatui::style::Stylize;
+use ratatui::symbols::border;
+use ratatui::text::Line;
+use ratatui::text::Text;
+use ratatui::widgets::{Block, Borders, Clear, Paragraph, Widget};
 
 pub(crate) struct TuiMainPanel {
     message: String,
@@ -32,7 +29,7 @@ impl TuiMainPanel {
 }
 
 impl Widget for TuiMainPanel {
-    fn render(self, area: Rect, buf: &mut ratatui::prelude::Buffer)
+    fn render(self, area: Rect, buf: &mut Buffer)
     where
         Self: Sized,
     {
@@ -77,7 +74,7 @@ impl TuiMainPanelTrait for TuiMainPanel {
 pub(crate) struct TuiHexHeaderLabel;
 
 impl Widget for TuiHexHeaderLabel {
-    fn render(self, area: Rect, buf: &mut ratatui::prelude::Buffer)
+    fn render(self, area: Rect, buf: &mut Buffer)
     where
         Self: Sized,
     {
@@ -142,7 +139,7 @@ impl TuiMainContentTrait for TuiMainContent {
 }
 
 impl Widget for TuiMainContent {
-    fn render(self, area: Rect, buf: &mut ratatui::prelude::Buffer)
+    fn render(self, area: Rect, buf: &mut Buffer)
     where
         Self: Sized,
     {

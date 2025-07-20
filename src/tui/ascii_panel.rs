@@ -15,7 +15,7 @@ use crate::{
 pub(crate) struct TuiAsciiPanel;
 
 impl Widget for TuiAsciiPanel {
-    fn render(self, area: ratatui::prelude::Rect, buf: &mut ratatui::prelude::Buffer)
+    fn render(self, area: ratatui::layout::Rect, buf: &mut ratatui::buffer::Buffer)
     where
         Self: Sized,
     {

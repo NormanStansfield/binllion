@@ -1,8 +1,7 @@
-use std::ops::Range;
-
 use crate::constants;
 use crate::interfaces::TuiArea;
 use crate::interfaces::WindowTrait;
+use std::ops::Range;
 
 pub(crate) struct Window {
     window_y: usize,
@@ -51,10 +50,8 @@ impl Window {
 
 #[cfg(test)]
 mod tests {
-
-    use ratatui::layout::Rect;
-
     use super::*;
+    use ratatui::layout::Rect;
 
     #[test]
     fn test_window() {

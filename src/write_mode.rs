@@ -1,6 +1,5 @@
-use core::fmt;
-
 use crate::interfaces::WriteModeTrait;
+use core::fmt;
 
 #[derive(Debug, Clone)]
 #[cfg_attr(test, derive(PartialEq))]

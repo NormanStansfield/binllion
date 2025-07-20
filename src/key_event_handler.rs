@@ -1,6 +1,5 @@
-use crossterm::event::{Event, KeyCode, KeyEventKind, KeyModifiers};
-
 use crate::interfaces::{CharCode, Command, KeyEventHandlerTrait};
+use crossterm::event::{Event, KeyCode, KeyEventKind, KeyModifiers};
 
 pub(crate) struct KeyEventHandler;
 
@@ -10,8 +9,6 @@ impl KeyEventHandlerTrait for KeyEventHandler {
         match event {
             // キー入力処理
             Ok(Event::Key(key_event)) if key_event.kind == KeyEventKind::Press => {
-                // Self::key_events(&key_event)
-
                 // Ctrl や SHIFT等のコンビネーションキー処理
                 match key_event.modifiers {
                     // Ctrlが押されている場合
@@ -22,92 +19,66 @@ impl KeyEventHandlerTrait for KeyEventHandler {
                             KeyCode::Char(char_code)
                                 if matches!(char_code.to_ascii_lowercase(), 'q') =>
                             {
-                                // KeyCode::Char('q') | KeyCode::Char('Q') => {
                                 // イベントループ終了
-                                // self.looping = false;
                                 return Command::Exit;
                             }
                             _ => {
-                                // return Command::Nope
+                                // return Command::Nop
                             }
                         }
                     }
                     // KeyModifiers::SHIFT 等
                     _ => {
                         // todo!()
-                        //  return Command::Nope
+                        //  return Command::Nop
                     }
                 }
 
                 // 通常のキー入力処理
                 match key_event.code {
-                    // match code.into_inner() {
                     // 文字関連
                     // カーソル左移動
                     KeyCode::Char(char_code) if matches!(char_code.to_ascii_lowercase(), 'h') => {
-                        // KeyCode::Char('h') | KeyCode::Char('H') => {
-                        // cursor.move_to_left();
-                        // self.reset_input_buf(message);
                         Command::MoveToLeft
                     }
                     // カーソル右移動
                     KeyCode::Char(char_code) if matches!(char_code.to_ascii_lowercase(), 'l') => {
-                        // KeyCode::Char('l') | KeyCode::Char('L') => {
-                        // cursor.move_to_right(len);
-                        // self.reset_input_buf(message);
                         Command::MoveToRight
                     }
                     // カーソル下移動
                     KeyCode::Char(char_code) if matches!(char_code.to_ascii_lowercase(), 'j') => {
-                        // KeyCode::Char('j') | KeyCode::Char('J') => {
-                        // cursor.move_to_down(len);
-                        // self.reset_input_buf(message);
                         Command::MoveToDown
                     }
                     // カーソル上移動
                     KeyCode::Char(char_code) if matches!(char_code.to_ascii_lowercase(), 'k') => {
-                        // KeyCode::Char('k') | KeyCode::Char('K') => {
-                        // cursor.move_to_up();
-                        // self.reset_input_buf(message);
                         Command::MoveToUp
                     }
 
                     // 削除
-                    KeyCode::Delete => {
-                        // KeyCode::Delete | KeyCode::Char('x') | KeyCode::Char('X') => {
-                        Command::DeleteData
-                    }
+                    KeyCode::Delete => Command::DeleteData,
 
                     // 削除
                     KeyCode::Char(char_code) if matches!(char_code.to_ascii_lowercase(), 'x') => {
-                        // KeyCode::Delete | KeyCode::Char('x') | KeyCode::Char('X') => {
                         Command::DeleteData
                     }
 
                     // 書き込みモード変更
                     KeyCode::Char(char_code) if matches!(char_code.to_ascii_lowercase(), 'i') => {
-                        // KeyCode::Char('i') | KeyCode::Char('I') => {
-                        // message.toggle_mode();
                         Command::ChangeWriteMode
                     }
 
                     // ファイルへ保存
-                    // KeyCode::Char('w') | KeyCode::Char('W') => Command::ExportFile,
                     KeyCode::Char(char_code) if matches!(char_code.to_ascii_lowercase(), 'w') => {
                         Command::ExportFile
                     }
 
                     // 数値データ入力
-                    // KeyCode::Char(char_code @ ('0'..='9' | 'a'..='f' | 'A'..='F')) => {
                     KeyCode::Char(char_code) if matches!(char_code.to_ascii_lowercase(), '0'..='9' | 'a'..='f') => {
                         Command::InputData(CharCode::new(char_code))
                     }
 
                     // 矢印キー等制御文字は対象外
-                    _ => {
-                        // todo!()
-                        Command::Nop
-                    }
+                    _ => Command::Nop,
                 }
             }
             // エラーの場合
@@ -116,10 +87,7 @@ impl KeyEventHandlerTrait for KeyEventHandler {
                 Command::Nop
             }
             // その他入力（マウス等）
-            _ => {
-                // todo!()
-                Command::Nop
-            }
+            _ => Command::Nop,
         }
     }
 }

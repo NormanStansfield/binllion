@@ -1,7 +1,8 @@
+use crate::{
+    constants,
+    interfaces::{BinDataIndexTrait, Index, ViewPosition},
+};
 use ratatui::layout::Position;
-
-use crate::interfaces::{BinDataIndexTrait, ViewPosition};
-use crate::{constants, interfaces::Index};
 
 pub(crate) struct BinDataIndex {
     index: usize,
@@ -69,7 +70,6 @@ impl BinDataIndexTrait for BinDataIndex {
 
 #[cfg(test)]
 mod tests {
-
     use super::*;
 
     #[test]
