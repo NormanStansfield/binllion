@@ -88,17 +88,18 @@ impl BinDataTrait for BinData {
         Ok(())
     }
 
-    fn get_data(&self, index: Index) -> Result<HexData, ()> {
+    fn to_hex_data(&self, index: Index) -> Option<HexData> {
         let index = index.into_inner();
         let res = self.buf.get(index);
-        if let Some(value) = res {
-            Ok(HexData::new(*value))
-        } else {
-            Err(())
-        }
+        // if let Some(value) = res {
+        //     Some(HexData::new(*value))
+        // } else {
+        //     None
+        // }
+        res.map(|value| HexData::new(*value))
     }
 
-    fn get_file_name(&self) -> Notice {
+    fn file_name(&self) -> Notice {
         let file_name = std::path::Path::new(&self.path)
             .file_name()
             .map(|name| name.to_string_lossy().to_string())
@@ -112,12 +113,12 @@ impl BinDataTrait for BinData {
         }
     }
 
-    fn get_size(&mut self) -> Index {
+    fn len(&mut self) -> Index {
         self.buf.make_contiguous();
         Index::new(self.buf.len())
     }
 
-    fn get_slice(&mut self, range: Range<usize>) -> Vec<u8> {
+    fn to_vec(&mut self, range: Range<usize>) -> Vec<u8> {
         let start = range.start;
 
         self.buf.make_contiguous();
@@ -141,7 +142,7 @@ impl CurrentFileTrait for BinData {
         }
     }
 
-    fn get_path(&self) -> FilePath {
+    fn path(&self) -> FilePath {
         unimplemented!()
     }
 }
@@ -155,33 +156,30 @@ mod tests {
     fn test_bin_data() {
         let mut bin_data = BinData::new();
 
-        assert!(bin_data.get_data(Index::new(0)).is_err());
+        assert!(bin_data.to_hex_data(Index::new(0)).is_none());
 
         bin_data.update_data(Index::new(0), HexData::new(99));
-        assert_eq!(bin_data.get_data(Index::new(0)), Err(()));
+        assert_eq!(bin_data.to_hex_data(Index::new(0)), None);
 
         bin_data.insert_data(Index::new(0), HexData::new(99));
-        assert_eq!(bin_data.get_data(Index::new(0)), Ok(HexData::new(99)));
+        assert_eq!(bin_data.to_hex_data(Index::new(0)), Some(HexData::new(99)));
 
         bin_data.update_data(Index::new(0), HexData::new(55));
-        assert_eq!(bin_data.get_data(Index::new(0)), Ok(HexData::new(55)));
+        assert_eq!(bin_data.to_hex_data(Index::new(0)), Some(HexData::new(55)));
 
         // bin_data.add_data(HexData::new(64)); // Add '@'
         // assert_eq!(bin_data.get_data(Index::new(1)), Ok(HexData::new(64)));
         bin_data.insert_data(Index::new(1), HexData::new(64));
-        assert_eq!(bin_data.get_data(Index::new(1)), Ok(HexData::new(64)));
+        assert_eq!(bin_data.to_hex_data(Index::new(1)), Some(HexData::new(64)));
 
-        assert_eq!(bin_data.get_size(), Index::new(2));
+        assert_eq!(bin_data.len(), Index::new(2));
 
-        assert_eq!(bin_data.get_slice(0..2), vec![55, 64]);
+        assert_eq!(bin_data.to_vec(0..2), vec![55, 64]);
 
         bin_data.delete_data(Index::new(0));
-        assert_eq!(bin_data.get_data(Index::new(0)), Ok(HexData::new(64)));
+        assert_eq!(bin_data.to_hex_data(Index::new(0)), Some(HexData::new(64)));
 
-        assert_eq!(
-            bin_data.get_file_name(),
-            Notice::new(String::from("no file"))
-        );
+        assert_eq!(bin_data.file_name(), Notice::new(String::from("no file")));
 
         assert!(bin_data.export_to().is_err());
 
@@ -194,19 +192,16 @@ mod tests {
             let file_path = FilePath::new(Some(file_path.into_os_string()));
 
             bin_data.set_path(file_path.clone());
-            assert_eq!(
-                bin_data.get_file_name(),
-                Notice::new(String::from(file_name))
-            );
+            assert_eq!(bin_data.file_name(), Notice::new(String::from(file_name)));
 
             assert!(bin_data.export_to().is_ok());
 
             bin_data.delete_data(Index::new(0));
-            assert!(bin_data.get_data(Index::new(0)).is_err());
+            assert!(bin_data.to_hex_data(Index::new(0)).is_none());
 
             let res = bin_data.import_from(file_path);
             assert!(res.is_ok());
-            assert_eq!(bin_data.get_data(Index::new(0)), Ok(HexData::new(64)));
+            assert_eq!(bin_data.to_hex_data(Index::new(0)), Some(HexData::new(64)));
         } else {
             panic!("Temporary file creation error on test_bin_data()");
         };

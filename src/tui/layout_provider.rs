@@ -3,7 +3,7 @@ use crate::interfaces::{TuiArea, TuiLayout, TuiLayoutProviderTrait};
 pub(crate) struct TuiLayoutProvider;
 
 impl TuiLayoutProviderTrait for TuiLayoutProvider {
-    fn get_layout(terminal: &mut ratatui::DefaultTerminal) -> TuiLayout {
+    fn layout(terminal: &mut ratatui::DefaultTerminal) -> TuiLayout {
         let frame = terminal.get_frame();
 
         // 左右に50%分割

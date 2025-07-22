@@ -100,7 +100,7 @@ impl AppTrait for App {
         if let Err(err) = res {
             // エラーであれば通知する
             let message = err.to_string();
-            notice_provider.add(Notice::new(message));
+            notice_provider.push(Notice::new(message));
             bin_data = BinData::new();
             // 新規ファイルとしてファイルパスをセットする
             bin_data.set_path(file_path);
@@ -113,28 +113,28 @@ impl AppTrait for App {
         let mut window = Window::new();
 
         while self.is_running() {
-            bin_data_index.set_size(bin_data.get_size());
+            bin_data_index.set_size(bin_data.len());
 
             // 領域レイアウト取得
-            let layout = crate::tui::TuiLayoutProvider::get_layout(&mut self.terminal);
+            let layout = crate::tui::TuiLayoutProvider::layout(&mut self.terminal);
 
             // カーソル移動領域を取得
-            let range = window.get_range(layout.main_content.clone());
+            let range = window.window_range(layout.main_content.clone());
 
             // メインパネル
             let mut tui_main_panel = TuiMainPanel::new();
-            tui_main_panel.set_err_msg(notice_provider.get_notice());
-            tui_main_panel.set_title(bin_data.get_file_name());
+            tui_main_panel.set_err_msg(notice_provider.pop());
+            tui_main_panel.set_title(bin_data.file_name());
             tui_main_panel.set_mode(write_mode.clone());
 
             // メインパネル - コンテンツ
             let mut tui_main_content = TuiMainContent::new();
             let address = range.start;
-            tui_main_content.set_content(bin_data.get_slice(range.clone()), address);
+            tui_main_content.set_content(bin_data.to_vec(range.clone()), address);
 
             // ASCIIパネル
             let mut tui_ascii_content = TuiAsciiContent::new();
-            tui_ascii_content.set_content(bin_data.get_slice(range), address);
+            tui_ascii_content.set_content(bin_data.to_vec(range), address);
 
             // Versatileパネル
             // let tui_versatile_panel = TuiVersatilePanel;
@@ -157,13 +157,13 @@ impl AppTrait for App {
 
             // カーソル表示
             let position = TuiMainContent::with_mini_buf_position(
-                TuiMainContent::get_view_position(
-                    bin_data_index.get_current_line(),
+                TuiMainContent::view_position(
+                    bin_data_index.current_line(),
                     layout.main_content.clone(),
-                    bin_data_index.get_position(),
-                    window.get_window_y(),
+                    bin_data_index.position(),
+                    window.origin_wy(),
                 ),
-                mini_buf.get_position(),
+                mini_buf.mini_buf_position(),
             );
 
             let ViewPosition(position) = position;
@@ -183,18 +183,18 @@ impl AppTrait for App {
                     if let Err(err) = res {
                         // エラーであれば通知する
                         let message = err.to_string();
-                        notice_provider.add(Notice::new(message));
+                        notice_provider.push(Notice::new(message));
                     } else {
-                        let message = format!("Saved {}", bin_data.get_file_name().into_inner());
-                        notice_provider.add(Notice::new(message));
+                        let message = format!("Saved {}", bin_data.file_name().into_inner());
+                        notice_provider.push(Notice::new(message));
                     }
                 }
                 Command::MoveToUp => {
                     let index = bin_data_index.move_to_up();
-                    window.move_to_up(bin_data_index.get_current_line());
+                    window.move_to_up(bin_data_index.current_line());
                     match write_mode {
                         WriteMode::OverWrite => {
-                            if let Ok(value) = bin_data.get_data(index) {
+                            if let Some(value) = bin_data.to_hex_data(index) {
                                 mini_buf.updata(value);
                             }
                         }
@@ -204,13 +204,13 @@ impl AppTrait for App {
                 Command::MoveToDown => {
                     let index = bin_data_index.move_to_down();
                     window.move_to_down(
-                        bin_data_index.get_current_line(),
+                        bin_data_index.current_line(),
                         layout.main_content.clone(),
-                        bin_data_index.get_max_line(),
+                        bin_data_index.max_line(),
                     );
                     match write_mode {
                         WriteMode::OverWrite => {
-                            if let Ok(value) = bin_data.get_data(index) {
+                            if let Some(value) = bin_data.to_hex_data(index) {
                                 mini_buf.updata(value);
                             }
                         }
@@ -221,7 +221,7 @@ impl AppTrait for App {
                     let index = bin_data_index.move_to_left();
                     match write_mode {
                         WriteMode::OverWrite => {
-                            if let Ok(value) = bin_data.get_data(index) {
+                            if let Some(value) = bin_data.to_hex_data(index) {
                                 mini_buf.updata(value);
                             }
                         }
@@ -232,7 +232,7 @@ impl AppTrait for App {
                     let index = bin_data_index.move_to_right();
                     match write_mode {
                         WriteMode::OverWrite => {
-                            if let Ok(value) = bin_data.get_data(index) {
+                            if let Some(value) = bin_data.to_hex_data(index) {
                                 mini_buf.updata(value);
                             }
                         }
@@ -248,14 +248,14 @@ impl AppTrait for App {
                     let pos = mini_buf.add(value);
                     match write_mode {
                         WriteMode::OverWrite => {
-                            let res = mini_buf.to_hex();
+                            let res = mini_buf.to_hex_data();
                             if let Ok(value) = res {
                                 let index = bin_data_index.index();
                                 bin_data.update_data(index, value);
                             }
                         }
                         WriteMode::Insert if pos == MiniBufPosition::Right => {
-                            let res = mini_buf.to_hex();
+                            let res = mini_buf.to_hex_data();
                             if let Ok(value) = res {
                                 let index = bin_data_index.index();
                                 bin_data.update_data(index, value);
@@ -263,7 +263,7 @@ impl AppTrait for App {
                             }
                         }
                         WriteMode::Insert if pos == MiniBufPosition::Left => {
-                            let res = mini_buf.to_hex();
+                            let res = mini_buf.to_hex_data();
                             if let Ok(value) = res {
                                 let index = bin_data_index.index();
                                 bin_data.insert_data(index, value);

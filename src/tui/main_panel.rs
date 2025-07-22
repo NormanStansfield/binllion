@@ -2,7 +2,7 @@ use crate::constants;
 use crate::interfaces::{
     MiniBufPosition, Notice, TuiArea, TuiMainContentTrait, TuiMainPanelTrait, ViewPosition,
 };
-use crate::tui::converter::{Converter, ForHex};
+use crate::tui::converter::{convert_to_lines, ForHex};
 use crate::write_mode::WriteMode;
 use ratatui::buffer::Buffer;
 use ratatui::layout::{Position, Rect};
@@ -122,7 +122,7 @@ impl TuiMainContentTrait for TuiMainContent {
         }
     }
 
-    fn get_view_position(
+    fn view_position(
         current_line: usize,
         area: TuiArea,
         position: ViewPosition,
@@ -145,10 +145,7 @@ impl Widget for TuiMainContent {
     {
         // 編集データ
         let mut main_panel_data: Vec<Line<'_>> = Vec::new();
-        main_panel_data.append(&mut Converter::convert_to_lines::<ForHex>(
-            &self.content,
-            self.address,
-        ));
+        main_panel_data.append(&mut convert_to_lines::<ForHex>(&self.content, self.address));
         Paragraph::new(Text::from(main_panel_data)).render(area, buf);
     }
 }
@@ -256,21 +253,21 @@ mod tests {
         });
         let window_y = 0;
 
-        let res = TuiMainContent::get_view_position(current_line, area.clone(), position, window_y);
+        let res = TuiMainContent::view_position(current_line, area.clone(), position, window_y);
         assert_eq!(res, ViewPosition(Position { x: 45, y: 20 }));
 
         let current_line = 15;
         let position = ViewPosition(Position { x: 15, y: 15 });
         let window_y = 0;
 
-        let res = TuiMainContent::get_view_position(current_line, area.clone(), position, window_y);
+        let res = TuiMainContent::view_position(current_line, area.clone(), position, window_y);
         assert_eq!(res, ViewPosition(Position { x: 60, y: 20 }));
 
         let current_line = 25;
         let position = ViewPosition(Position { x: 15, y: 15 });
         let window_y = 20;
 
-        let res = TuiMainContent::get_view_position(current_line, area.clone(), position, window_y);
+        let res = TuiMainContent::view_position(current_line, area.clone(), position, window_y);
         assert_eq!(res, ViewPosition(Position { x: 60, y: 10 }));
     }
 }

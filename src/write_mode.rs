@@ -22,7 +22,7 @@ impl fmt::Display for WriteMode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::OverWrite => write!(f, " OVR "),
-            Self::Insert => write!(f, " INT "),
+            Self::Insert => write!(f, " INS "),
         }
     }
 }

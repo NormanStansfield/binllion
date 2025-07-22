@@ -21,4 +21,4 @@ expression: terminal.backend()
 "┃                                                                              ┃"
 "┃                                                                              ┃"
 "┃                                                                              ┃"
-"┗ Mode: INT ━━━━━━━━━━━━━━━━━━━━━ Test Message ━━━━━━━━━━━━━━━━━ Quit <Ctrl+Q> ┛"
+"┗ Mode: INS ━━━━━━━━━━━━━━━━━━━━━ Test Message ━━━━━━━━━━━━━━━━━ Quit <Ctrl+Q> ┛"

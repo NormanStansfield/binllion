@@ -50,17 +50,17 @@ impl BinDataIndexTrait for BinDataIndex {
         self.size = value;
     }
 
-    fn get_max_line(&self) -> usize {
+    fn max_line(&self) -> usize {
         let offset = self.size.rem_euclid(constants::LINE_LEN);
         (self.size.saturating_sub(offset) / constants::LINE_LEN).saturating_sub(1)
     }
 
-    fn get_current_line(&self) -> usize {
+    fn current_line(&self) -> usize {
         let offset = self.index.rem_euclid(constants::LINE_LEN);
         self.index.saturating_sub(offset) / constants::LINE_LEN
     }
 
-    fn get_position(&self) -> ViewPosition {
+    fn position(&self) -> ViewPosition {
         let x = (self.index % constants::LINE_LEN) as u16;
         let y = (self.index / constants::LINE_LEN) as u16;
 
@@ -78,91 +78,64 @@ mod tests {
         assert_eq!(bin_data_index.index(), Index::new(0));
 
         bin_data_index.set_size(Index::new(100));
-        assert_eq!(bin_data_index.get_max_line(), 100 / constants::LINE_LEN - 1);
+        assert_eq!(bin_data_index.max_line(), 100 / constants::LINE_LEN - 1);
 
-        assert_eq!(
-            bin_data_index.get_position(),
-            ViewPosition(Position::new(0, 0))
-        );
-        assert_eq!(bin_data_index.get_current_line(), 0);
+        assert_eq!(bin_data_index.position(), ViewPosition(Position::new(0, 0)));
+        assert_eq!(bin_data_index.current_line(), 0);
 
         bin_data_index.move_to_right();
         assert_eq!(bin_data_index.index(), Index::new(1));
-        assert_eq!(
-            bin_data_index.get_position(),
-            ViewPosition(Position::new(1, 0))
-        );
-        assert_eq!(bin_data_index.get_current_line(), 0);
+        assert_eq!(bin_data_index.position(), ViewPosition(Position::new(1, 0)));
+        assert_eq!(bin_data_index.current_line(), 0);
 
         bin_data_index.move_to_right();
         assert_eq!(bin_data_index.index(), Index::new(2));
-        assert_eq!(
-            bin_data_index.get_position(),
-            ViewPosition(Position::new(2, 0))
-        );
-        assert_eq!(bin_data_index.get_current_line(), 0);
+        assert_eq!(bin_data_index.position(), ViewPosition(Position::new(2, 0)));
+        assert_eq!(bin_data_index.current_line(), 0);
 
         bin_data_index.move_to_down();
         assert_eq!(bin_data_index.index(), Index::new(2 + constants::LINE_LEN));
-        assert_eq!(
-            bin_data_index.get_position(),
-            ViewPosition(Position::new(2, 1))
-        );
-        assert_eq!(bin_data_index.get_current_line(), 1);
+        assert_eq!(bin_data_index.position(), ViewPosition(Position::new(2, 1)));
+        assert_eq!(bin_data_index.current_line(), 1);
 
         bin_data_index.move_to_down();
         assert_eq!(
             bin_data_index.index(),
             Index::new(2 + constants::LINE_LEN * 2)
         );
-        assert_eq!(
-            bin_data_index.get_position(),
-            ViewPosition(Position::new(2, 2))
-        );
-        assert_eq!(bin_data_index.get_current_line(), 2);
+        assert_eq!(bin_data_index.position(), ViewPosition(Position::new(2, 2)));
+        assert_eq!(bin_data_index.current_line(), 2);
 
         bin_data_index.move_to_left();
         assert_eq!(
             bin_data_index.index(),
             Index::new(1 + constants::LINE_LEN * 2)
         );
-        assert_eq!(
-            bin_data_index.get_position(),
-            ViewPosition(Position::new(1, 2))
-        );
-        assert_eq!(bin_data_index.get_current_line(), 2);
+        assert_eq!(bin_data_index.position(), ViewPosition(Position::new(1, 2)));
+        assert_eq!(bin_data_index.current_line(), 2);
 
         bin_data_index.move_to_left();
         assert_eq!(
             bin_data_index.index(),
             Index::new(0 + constants::LINE_LEN * 2)
         );
-        assert_eq!(
-            bin_data_index.get_position(),
-            ViewPosition(Position::new(0, 2))
-        );
-        assert_eq!(bin_data_index.get_current_line(), 2);
+        assert_eq!(bin_data_index.position(), ViewPosition(Position::new(0, 2)));
+        assert_eq!(bin_data_index.current_line(), 2);
 
         bin_data_index.move_to_up();
         assert_eq!(
             bin_data_index.index(),
             Index::new(0 + constants::LINE_LEN * 1)
         );
-        assert_eq!(
-            bin_data_index.get_position(),
-            ViewPosition(Position::new(0, 1))
-        );
-        assert_eq!(bin_data_index.get_current_line(), 1);
+        assert_eq!(bin_data_index.position(), ViewPosition(Position::new(0, 1)));
+        assert_eq!(bin_data_index.current_line(), 1);
 
         bin_data_index.move_to_up();
         assert_eq!(
             bin_data_index.index(),
             Index::new(0 + constants::LINE_LEN * 0)
         );
-        assert_eq!(
-            bin_data_index.get_position(),
-            ViewPosition(Position::new(0, 0))
-        );
-        assert_eq!(bin_data_index.get_current_line(), 0);
+        assert_eq!(bin_data_index.position(), ViewPosition(Position::new(0, 0)));
+        assert_eq!(bin_data_index.current_line(), 0);
     }
 }

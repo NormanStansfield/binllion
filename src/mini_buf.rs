@@ -18,7 +18,7 @@ impl MiniBufTrait for MiniBuf {
         self.buf[self.index] = value.to_ascii_uppercase();
         self.index = (self.index + 1) % 2;
 
-        self.get_position()
+        self.mini_buf_position()
     }
 
     fn updata(&mut self, value: HexData) {
@@ -33,7 +33,7 @@ impl MiniBufTrait for MiniBuf {
         self.index = 0;
     }
 
-    fn to_hex(&self) -> Result<HexData, std::num::ParseIntError> {
+    fn to_hex_data(&self) -> Result<HexData, std::num::ParseIntError> {
         let str: String = self.buf.iter().collect();
         let res = u8::from_str_radix(&str, 16);
         match res {
@@ -42,7 +42,7 @@ impl MiniBufTrait for MiniBuf {
         }
     }
 
-    fn get_position(&self) -> MiniBufPosition {
+    fn mini_buf_position(&self) -> MiniBufPosition {
         match &self.index {
             0 => MiniBufPosition::Right,
             1 => MiniBufPosition::Left,
@@ -60,10 +60,10 @@ mod tests {
         let mut mini_buf = MiniBuf::new();
 
         // 初期状態のテスト
-        let res = mini_buf.get_position();
+        let res = mini_buf.mini_buf_position();
         assert_eq!(res, MiniBufPosition::Right);
 
-        let res = mini_buf.to_hex();
+        let res = mini_buf.to_hex_data();
         match res {
             Ok(val) => {
                 assert_eq!(val.into_inner(), 0u8)
@@ -76,7 +76,7 @@ mod tests {
         // 9を追加
         let char_code = '9';
         mini_buf.add(CharCode::new(char_code));
-        let res = mini_buf.to_hex();
+        let res = mini_buf.to_hex_data();
         match res {
             Ok(val) => {
                 assert_eq!(val.into_inner(), 0x90u8)
@@ -86,13 +86,13 @@ mod tests {
             }
         }
 
-        let res = mini_buf.get_position();
+        let res = mini_buf.mini_buf_position();
         assert_eq!(res, MiniBufPosition::Left);
 
         // Fを追加
         let char_code = 'F';
         mini_buf.add(CharCode::new(char_code));
-        let res = mini_buf.to_hex();
+        let res = mini_buf.to_hex_data();
         match res {
             Ok(val) => {
                 assert_eq!(val.into_inner(), 0x9Fu8)
@@ -102,13 +102,13 @@ mod tests {
             }
         }
 
-        let res = mini_buf.get_position();
+        let res = mini_buf.mini_buf_position();
         assert_eq!(res, MiniBufPosition::Right);
 
         // 45で上書き
         let val = 45;
         mini_buf.updata(HexData::new(val));
-        let res = mini_buf.to_hex();
+        let res = mini_buf.to_hex_data();
         match res {
             Ok(val) => {
                 assert_eq!(val.into_inner(), 45u8)
@@ -118,7 +118,7 @@ mod tests {
             }
         }
 
-        let res = mini_buf.get_position();
+        let res = mini_buf.mini_buf_position();
         assert_eq!(res, MiniBufPosition::Right);
     }
 }

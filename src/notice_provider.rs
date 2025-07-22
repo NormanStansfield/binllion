@@ -20,14 +20,14 @@ impl NoticeProviderTrait for NoticeProvider {
     }
 
     // メッセージキューへ追加
-    fn add(&mut self, notice: Notice) {
+    fn push(&mut self, notice: Notice) {
         let message = notice.into_inner();
 
         self.queue.push_back(message);
     }
 
     // メッセージ取得
-    fn get_notice(&mut self) -> Notice {
+    fn pop(&mut self) -> Notice {
         match self.count {
             0 => {
                 if let Some(message) = self.queue.pop_front() {
@@ -59,14 +59,14 @@ mod tests {
     fn test_notice_provider() {
         let mut notice_provider = NoticeProvider::new();
         let test_data_notice = "TestMessage".to_string();
-        notice_provider.add(Notice::new(test_data_notice.clone()));
+        notice_provider.push(Notice::new(test_data_notice.clone()));
         (0..=LIMIT).for_each(|_| {
-            let res = notice_provider.get_notice();
+            let res = notice_provider.pop();
             assert_eq!(res.into_inner(), test_data_notice);
         });
-        let res = notice_provider.get_notice();
+        let res = notice_provider.pop();
         assert_eq!(res.into_inner(), String::from(""));
-        let res = notice_provider.get_notice();
+        let res = notice_provider.pop();
         assert_eq!(res.into_inner(), String::from(""));
     }
 }

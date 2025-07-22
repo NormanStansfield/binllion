@@ -12,8 +12,8 @@ pub(crate) trait AppTrait {
 
 pub(crate) trait NoticeProviderTrait {
     fn new() -> Self;
-    fn add(&mut self, notice: Notice);
-    fn get_notice(&mut self) -> Notice;
+    fn push(&mut self, notice: Notice);
+    fn pop(&mut self) -> Notice;
 }
 
 #[cfg_attr(not(test), nutype(sanitize(trim), derive(Default), default = ""))]
@@ -21,7 +21,6 @@ pub(crate) trait NoticeProviderTrait {
     test,
     nutype(sanitize(trim), derive(Default, Debug, PartialEq), default = "")
 )]
-
 pub(crate) struct Notice(String);
 
 #[nutype(derive(Clone))]
@@ -29,7 +28,7 @@ pub(crate) struct FilePath(Option<std::ffi::OsString>);
 
 pub(crate) trait CurrentFileTrait {
     #[allow(dead_code)]
-    fn get_path(&self) -> FilePath;
+    fn path(&self) -> FilePath; // unimplemented!
     fn set_path(&mut self, path: FilePath);
 }
 
@@ -41,17 +40,19 @@ pub(crate) trait BinDataTrait {
     fn update_data(&mut self, index: Index, value: HexData);
     fn import_from(&mut self, path: FilePath) -> std::io::Result<()>;
     fn export_to(&self) -> std::io::Result<()>;
-    fn get_data(&self, index: Index) -> Result<HexData, ()>;
-    fn get_file_name(&self) -> Notice;
-    fn get_size(&mut self) -> Index;
-    fn get_slice(&mut self, range: Range<usize>) -> Vec<u8>;
+    fn to_hex_data(&self, index: Index) -> Option<HexData>;
+    fn file_name(&self) -> Notice;
+    fn len(&mut self) -> Index;
+    fn to_vec(&mut self, range: Range<usize>) -> Vec<u8>;
 }
 
-#[cfg_attr(not(test), nutype(derive(Clone, AsRef)))]
+// #[cfg_attr(not(test), nutype(derive(Clone, AsRef)))]
+#[cfg_attr(not(test), nutype())]
 #[cfg_attr(test, nutype(derive(Clone, AsRef, PartialEq, Debug)))]
 pub(crate) struct HexData(u8);
 
-#[cfg_attr(not(test), nutype(derive(Clone, AsRef)))]
+// #[cfg_attr(not(test), nutype(derive(Clone, AsRef)))]
+#[cfg_attr(not(test), nutype())]
 #[cfg_attr(test, nutype(derive(Clone, AsRef, PartialEq, Debug)))]
 pub(crate) struct Index(usize);
 
@@ -59,8 +60,8 @@ pub(crate) trait KeyEventHandlerTrait {
     fn handle_key_event(event: Result<crossterm::event::Event, std::io::Error>) -> Command;
 }
 
-#[derive(Debug)]
-#[cfg_attr(test, derive(PartialEq))]
+// #[derive(Debug)]
+#[cfg_attr(test, derive(PartialEq, Debug))]
 pub(crate) enum Command {
     MoveToUp,
     MoveToDown,
@@ -79,8 +80,8 @@ pub(crate) trait MiniBufTrait {
     fn new() -> Self;
     fn add(&mut self, char_code: CharCode) -> MiniBufPosition;
     fn updata(&mut self, value: HexData);
-    fn to_hex(&self) -> Result<HexData, std::num::ParseIntError>;
-    fn get_position(&self) -> MiniBufPosition;
+    fn to_hex_data(&self) -> Result<HexData, std::num::ParseIntError>;
+    fn mini_buf_position(&self) -> MiniBufPosition;
 }
 
 #[derive(PartialEq)]
@@ -90,7 +91,8 @@ pub(crate) enum MiniBufPosition {
     Left,
 }
 
-#[cfg_attr(not(test), nutype(sanitize(with = |char| char.to_ascii_lowercase()), derive(AsRef, Debug)))]
+// #[cfg_attr(not(test), nutype(sanitize(with = |char| char.to_ascii_lowercase()), derive(AsRef, Debug)))]
+#[cfg_attr(not(test), nutype(sanitize(with = |char| char.to_ascii_lowercase())))]
 #[cfg_attr(test, nutype(sanitize(with = |char| char.to_ascii_lowercase()), derive(AsRef, Debug, PartialEq)))]
 pub(crate) struct CharCode(char);
 
@@ -102,13 +104,13 @@ pub(crate) trait BinDataIndexTrait {
     fn move_to_up(&mut self) -> Index;
     fn move_to_down(&mut self) -> Index;
     fn set_size(&mut self, value: Index);
-    fn get_position(&self) -> ViewPosition;
-    fn get_max_line(&self) -> usize;
-    fn get_current_line(&self) -> usize;
+    fn position(&self) -> ViewPosition;
+    fn max_line(&self) -> usize;
+    fn current_line(&self) -> usize;
 }
 
 pub(crate) trait WindowTrait {
-    fn get_range(&self, area: TuiArea) -> Range<usize>;
+    fn window_range(&self, area: TuiArea) -> Range<usize>;
     fn new() -> Self;
     fn move_to_up(&mut self, current_line: usize);
     fn move_to_down(&mut self, current_line: usize, area: TuiArea, max_line: usize);
@@ -122,7 +124,7 @@ pub(crate) trait WriteModeTrait {
 }
 
 pub(crate) trait TuiLayoutProviderTrait {
-    fn get_layout(terminal: &mut ratatui::DefaultTerminal) -> TuiLayout;
+    fn layout(terminal: &mut ratatui::DefaultTerminal) -> TuiLayout;
 }
 
 pub(crate) struct TuiLayout {
@@ -135,7 +137,8 @@ pub(crate) struct TuiLayout {
     pub(crate) versatile: TuiArea,
 }
 
-#[nutype(derive(Clone, AsRef))]
+// #[nutype(derive(Clone, AsRef))]
+#[nutype(derive(Clone))]
 pub(crate) struct TuiArea(ratatui::layout::Rect);
 
 pub(crate) trait TuiMainPanelTrait {
@@ -150,7 +153,7 @@ pub(crate) trait TuiMainContentTrait {
         position: ViewPosition,
         mini_buf_position: MiniBufPosition,
     ) -> ViewPosition;
-    fn get_view_position(
+    fn view_position(
         current_line: usize,
         area: TuiArea,
         position: ViewPosition,

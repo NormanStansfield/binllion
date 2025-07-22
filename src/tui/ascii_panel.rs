@@ -6,11 +6,7 @@ use ratatui::{
     widgets::{Block, Borders, Clear, Paragraph, Widget},
 };
 
-use crate::{
-    constants,
-    interfaces::TuiAsciiContentTrait,
-    tui::converter::{Converter, ForAscii},
-};
+use crate::{constants, interfaces::TuiAsciiContentTrait, tui::converter::*};
 
 pub(crate) struct TuiAsciiPanel;
 
@@ -75,7 +71,7 @@ impl Widget for TuiAsciiContent {
     {
         // Asciiデコーデッドデータ
         let mut ascii_content = Vec::new();
-        ascii_content.append(&mut Converter::convert_to_lines::<ForAscii>(
+        ascii_content.append(&mut convert_to_lines::<ForAscii>(
             &self.content,
             self.address,
         ));
