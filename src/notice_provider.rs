@@ -1,0 +1,72 @@
+use crate::constants;
+use crate::interfaces::Notice;
+use crate::interfaces::NoticeProviderTrait;
+use std::collections::VecDeque;
+
+// ステータス伝達
+pub(crate) struct NoticeProvider {
+    count: u8,
+    queue: VecDeque<String>,
+    cache: String,
+}
+
+impl NoticeProviderTrait for NoticeProvider {
+    fn new() -> Self {
+        Self {
+            count: 0,
+            queue: VecDeque::new(),
+            cache: String::with_capacity(0),
+        }
+    }
+
+    // メッセージキューへ追加
+    fn push(&mut self, notice: Notice) {
+        let message = notice.into_inner();
+
+        self.queue.push_back(message);
+    }
+
+    // メッセージ取得
+    fn pop(&mut self) -> Notice {
+        match self.count {
+            0 => {
+                if let Some(message) = self.queue.pop_front() {
+                    self.cache = message;
+                    self.count = 1;
+                } else {
+                    self.cache.clear();
+                }
+            }
+            x => {
+                if x >= constants::LIMIT {
+                    self.count = 0;
+                } else {
+                    self.count += 1;
+                }
+            }
+        }
+
+        Notice::new(self.cache.clone())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::constants::LIMIT;
+
+    #[test]
+    fn test_notice_provider() {
+        let mut notice_provider = NoticeProvider::new();
+        let test_data_notice = "TestMessage".to_string();
+        notice_provider.push(Notice::new(test_data_notice.clone()));
+        (0..=LIMIT).for_each(|_| {
+            let res = notice_provider.pop();
+            assert_eq!(res.into_inner(), test_data_notice);
+        });
+        let res = notice_provider.pop();
+        assert_eq!(res.into_inner(), String::from(""));
+        let res = notice_provider.pop();
+        assert_eq!(res.into_inner(), String::from(""));
+    }
+}

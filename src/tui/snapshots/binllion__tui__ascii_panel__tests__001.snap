@@ -1,0 +1,24 @@
+---
+source: src/tui/ascii_panel.rs
+expression: terminal.backend()
+---
+"0x000030 ................                                                       "
+"0x000040 ................                                                       "
+"0x000050  !"#$%&'()*+,-./                                                       "
+"0x000060 0123456789:;<=>?                                                       "
+"0x000070 @ABCDEFGHIJKLMNO                                                       "
+"0x000080 PQRSTUVWXYZ[\]^_                                                       "
+"0x000090 `abcdefghijklmno                                                       "
+"0x0000A0 pqrstuvwxyz{|}~.                                                       "
+"0x0000B0 ...........                                                            "
+"                                                                                "
+"                                                                                "
+"                                                                                "
+"                                                                                "
+"                                                                                "
+"                                                                                "
+"                                                                                "
+"                                                                                "
+"                                                                                "
+"                                                                                "
+"                                                                                "

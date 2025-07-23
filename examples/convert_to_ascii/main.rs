@@ -5,7 +5,11 @@
 
 // #[warn(dead_code)]
 
-fn main() {}
+fn main() {
+    println!("This code need nightly feature. At first, change to example folder where this code is here.");
+    println!("And then, perform following command");
+    println!("cargo test --example convert_to_ascii --features nightly");
+}
 
 // 16進数へ変換
 pub(crate) fn to_hex(buf: &[u8]) -> String {

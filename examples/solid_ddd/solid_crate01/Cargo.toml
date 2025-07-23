@@ -1,0 +1,25 @@
+[workspace]
+members = ["interfaces", "app", "driver", "car", "ui"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+
+[workspace.dependencies]
+interfaces = { path = "./interfaces" }
+app = { path = "./app" }
+driver = { path = "./driver" }
+car = { path = "./car" }
+ui = { path = "./ui" }
+
+rand = "0.9.1"
+
+
+[package]
+name = "solid_crate01"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+app.workspace = true
+interfaces.workspace = true

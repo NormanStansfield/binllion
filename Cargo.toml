@@ -1,6 +1,6 @@
 [package]
 name = "binllion"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -8,8 +8,21 @@ edition = "2021"
 [dependencies]
 clap = { version = "4.5.31", features = ["derive"] }
 crossterm = "0.28.1"
+nutype = "0.6.1"
 ratatui = "0.28.1"
 
 [dev-dependencies]
 ascii = "1.1.0"
 encoding_rs = "0.8.34"
+insta = { version = "1.43.1" }
+tempfile = "3.20.0"
+
+
+[[example]]
+name = "convert_to_ascii"
+path = "examples/convert_to_ascii/main.rs"
+required-features = ["nightly"]
+
+[features]
+default = []
+nightly = []

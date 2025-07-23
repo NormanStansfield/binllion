@@ -11,7 +11,12 @@ use std::io::{self, stdout};
 // ratatuiクレート
 use ratatui::prelude::*;
 use ratatui::symbols::border;
-use ratatui::widgets::{block::*, *};
+use ratatui::widgets::block::{Position, Title};
+use ratatui::widgets::Block;
+use ratatui::widgets::Borders;
+use ratatui::widgets::Paragraph;
+// use ratatui::symbols::border;
+// use ratatui::widgets::{block::*, *};
 
 // 画面初期化
 pub(crate) fn init_tui() -> io::Result<()> {
